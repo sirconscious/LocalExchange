@@ -1,5 +1,5 @@
-import React from "react";
-import logo from "../assets/logo.png";
+import React, { useState } from "react";
+import logo2 from "../assets/logo2.png";
 import { FaSearch } from "react-icons/fa";
 import { CiSquarePlus } from "react-icons/ci";
 import { GrFavorite } from "react-icons/gr";
@@ -7,28 +7,41 @@ import { LuMessageCircle } from "react-icons/lu";
 import { CgProfile } from "react-icons/cg";
 
 export default function NavBar() {
+  const [click, handleFocus] = useState(false);
+
   return (
-    <nav className="bg-white border-gray-200 border-b-2  shadow-lg ">
+    <nav className="bg-white border-gray-200 border-b-2 shadow-lg">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-center space-x-4 mx-auto p-4">
         <a href="#" className="flex items-center space-x-3 rtl:space-x-reverse">
-          <img src={logo} className="h-10" alt="Logo" />
+          <img src={logo2} className="h-10" alt="Logo" />
           <span className="self-center text-2xl font-semibold text-black whitespace-nowrap"></span>
         </a>
-        <button className="bg-[#FF6E14] text-white p-2 px-4  font-bold rounded-2xl flex items-center space-x-3">
-          <CiSquarePlus className=" text-2xl font-extrabold  cursor-pointer" />
+        <button
+          className={`bg-[#f76c15] hover:opacity-80 text-white transition-all delay-100 duration-1000 ease-in-out cursor-pointer py-3 px-4 font-bold rounded-2xl flex items-center  space-x-3 `}
+        >
+          <CiSquarePlus className="text-2xl font-extrabold cursor-pointer" />
           Déposer une annonce
         </button>
-        <div className="relative hidden md:block">
-          <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-            <FaSearch className="w-5 h-5 text-[#FF6E14] font-bold" />
-          </div>
+
+        <div
+          className={`relative hidden md:block transition-all duration-300  ease-in-out ${
+            click ? "w-[400px]" : "w-[200px]"
+          }`}
+          onMouseLeave={() => handleFocus(false)}
+          onClick={() => handleFocus(true)}
+        >
           <input
             type="text"
             id="search-navbar"
-            className="block w-full p-2 ps-10 text-sm text-black border border-gray-300 rounded-lg bg-gray-50 focus:ring-gray-500 focus:border-gray-500"
-            placeholder="Search..."
+            className="block w-full py-3 px-4 pe-10 text-sm text-black border-none outline-0 rounded-lg bg-gray-200 focus:ring-gray-500 focus:border-gray-500"
+            placeholder="Rechercher sur LocalExchanges"
           />
+
+          <div className="absolute inset-y-0 end-2 text-center flex items-center border-none pointer-events-none">
+            <FaSearch className="w-4 h-5 text-orange-500 font-bold" />
+          </div>
         </div>
+
         <div className="flex md:order-2">
           <button
             type="button"
@@ -40,6 +53,7 @@ export default function NavBar() {
             <span className="sr-only">Search</span>
           </button>
         </div>
+
         <div
           className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
           id="navbar-search"
