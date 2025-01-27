@@ -1,17 +1,22 @@
 import React from 'react';
 import logo from "../assets/logo.png";
 import { FaSearch } from "react-icons/fa";
+import { CiSquarePlus } from "react-icons/ci";
 
 export default function NavBar() {
   return (
-    <nav className="bg-white border-gray-200 border-b-2 border-b-indigo-300 ">
-      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+    <nav className="bg-white border-gray-200 border-b-2  shadow-lg ">
+      <div className="max-w-screen-xl flex flex-wrap items-center justify-evenly mx-auto p-4">
         <a href="#" className="flex items-center space-x-3 rtl:space-x-reverse">
           <img src={logo} className="h-8" alt="Logo" />
           <span className="self-center text-2xl font-semibold text-black whitespace-nowrap">
             
           </span>
         </a>
+        <button className='bg-[#FF6E14] text-white p-2 rounded-2xl flex items-center space-x-3'>
+            <CiSquarePlus className=' text-2xl font-extrabold  cursor-pointer' />
+            Deposer une annonce
+        </button>
         <div className="flex md:order-2">
           <button
             type="button"
@@ -25,7 +30,7 @@ export default function NavBar() {
           </button>
           <div className="relative hidden md:block">
             <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-            <FaSearch className="w-5 h-5 text-[#EC5A13]" />
+            <FaSearch className="w-5 h-5 text-[#FF6E14]" />
             </div>
             <input
               type="text"
