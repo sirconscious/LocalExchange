@@ -5,19 +5,19 @@ import { CiSquarePlus } from "react-icons/ci";
 import { GrFavorite } from "react-icons/gr";
 import { LuMessageCircle } from "react-icons/lu";
 import { CgProfile } from "react-icons/cg";
-
+import Filter from "./Filter";
 export default function NavBar() {
   const [click, handleFocus] = useState(false);
 
   return (
-    <nav className="bg-white border-gray-200 border-b-2 shadow-lg">
+    <nav className="bg-white  shadow-lg">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-center space-x-4 mx-auto p-4">
         <a href="#" className="flex items-center space-x-3 rtl:space-x-reverse">
           <img src={logo2} className="h-10" alt="Logo" />
           <span className="self-center text-2xl font-semibold text-black whitespace-nowrap"></span>
         </a>
         <button
-          className={`bg-[#f76c15] hover:opacity-80 text-white transition-all delay-100 duration-1000 ease-in-out cursor-pointer py-3 px-4 font-bold rounded-2xl flex items-center  space-x-3 `}
+          className={`bg-[#FF6E14] hover:opacity-85 transition-all  text-white cursor-pointer py-3 px-4 font-bold rounded-2xl flex items-center  space-x-3 `}
         >
           <CiSquarePlus className="text-2xl font-extrabold cursor-pointer" />
           Déposer une annonce
@@ -97,8 +97,11 @@ export default function NavBar() {
               </a>
             </li>
           </ul>
+      
         </div>
+       
       </div>
+      <Filter/>
     </nav>
   );
 }
