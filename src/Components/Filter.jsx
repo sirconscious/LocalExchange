@@ -9,7 +9,7 @@ export default function Filter() {
         {filterData.map((item, index) => (
           <li 
             key={index} 
-            className="cursor-pointer hover:text-black  text-lg flex flex-row text-gray-800 justify-center items-center group"
+            className="cursor-pointer hover:text-black transition-all ease-linear hover:underline  text-lg flex flex-row text-gray-800 justify-center items-center group"
           >
           <GoDotFill className="text-xs text-gray-400 mr-2" />
             <span>{item.name}</span>
@@ -17,6 +17,7 @@ export default function Filter() {
               className="block h-[2px] w-0 bg-gray-800 transition-all duration-300 ease-in-out group-hover:w-full mt-1"
             ></span> */}
           </li>
+          
         ))}
       </ul>
     </div>

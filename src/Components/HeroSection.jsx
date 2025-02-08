@@ -1,6 +1,6 @@
 import React from 'react';
 import cover from "../assets/cover2.png";  
-import Landingpage from '../assets/Landingpage.png';
+
 import { CiSquarePlus } from "react-icons/ci";
 
 export default function HeroSection() {

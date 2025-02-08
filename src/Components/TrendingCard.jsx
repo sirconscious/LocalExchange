@@ -3,7 +3,7 @@ import { FaHotjar } from "react-icons/fa";
 const TrendingCard = () => {
   return (
     <div
-      className="rounded-2xl mr-2.5 w-[200px] h-[263px] relative p-4 flex flex-col justify-between shadow-lg"
+      className="rounded-2xl mr-2.5 w-full  relative p-4 flex flex-col justify-between shadow-lg"
       style={{
         background:
           "linear-gradient(160deg, rgba(247, 215, 212, 1) 0%, rgba(236, 90, 19, 0.1) 50%, rgba(255, 238, 204, 1) 100%)",
