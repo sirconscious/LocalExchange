@@ -54,10 +54,13 @@ export default function Home() {
       </div>
       <div className="p-10 w-full flex flex-col items-center mt-10">
  
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-6xl h-72 w-full mt-6">
+  <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-6xl  w-full mt-6">
   <TrendingCard />
     {Trending.map((el, i) => (
-      <Card key={i} title={el.title} url={el.url} />
+      <div className='h-72'>
+        <Card key={i} title={el.title} url={el.url} />
+      </div>
+      
     ))}
   </div>
 </div>
@@ -65,7 +68,7 @@ export default function Home() {
       
 
       {/* Top Categories Section */}
-      <div className="p-20 bg-blend-color w-full mt-10">
+      <div className="py-10 px-20 bg-blend-color w-full ">
         <h2 className="text-2xl font-semibold mb-6">Top Catégories</h2>
         <div className="relative flex items-center">
           <button 
@@ -75,9 +78,12 @@ export default function Home() {
           >
             <AiOutlineLeft size={20} />
           </button>
-          <div className="grid grid-cols-4 gap-4 h-40 overflow-hidden w-full ml-10 mr-10">
-            {Categories.slice(currentIndex, currentIndex + 4).map((category, i) => (
-              <Card key={i} title={category.title} url={category.url} />
+          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 h-full overflow-hidden w-full ml-10 mr-10">
+            {Categories.slice(currentIndex, currentIndex + 5).map((category, i) => (
+              <div className='h-16'>
+                 <Card key={i} title={category.title} url={category.url} />
+              </div>
+             
             ))}
           </div>
           <button 

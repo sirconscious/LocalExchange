@@ -3,7 +3,7 @@ import React from "react";
 const Card = ({ title, url }) => {
   return (
     <div
-      className="rounded-2xl hover:opacity-90   transition-all ease-linear cursor-pointer mr-2.5 w-full h-56 sm:h-64 md:h-72 lg:h-full relative p-4 flex flex-col justify-end shadow-lg bg-cover bg-center"
+      className="rounded-2xl hover:opacity-90   transition-all ease-linear cursor-pointer mr-2.5 w-full h-full  relative p-4 flex flex-col justify-end shadow-lg bg-cover bg-center"
       style={{
         backgroundImage: `url(${url})`,
       }}
