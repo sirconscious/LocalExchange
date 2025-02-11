@@ -1,101 +1,92 @@
-import Image from "next/image";
+"use client"
+import React, { useState } from 'react';
 
+import HeroSection from './Components/HeroSection';
+import TrendingCard from './Components/TrendingCard';
+import Card from './Components/Card';
+import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const Trending = [
+    { title: "sport", url: '/trending/sport.jpg' },
+    { title: "books", url: '/trending/books.jpg' },
+    { title: "home", url: '/trending/home.jpg' },
+    { title: "pc", url: '/trending/pc.jpg' }
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const Categories = [
+    { title: "Astuces Maison", url: '/categories/home.jpg' },
+    { title: "Offres d'emploi", url: '/categories/stock.jpg' },
+    { title: "Vétments", url: '/categories/clothes.jpg' },
+    { title: "Voitures", url: '/categories/car.jpg' },
+    { title: "Ameublement", url: '/categories/furniture.jpg' },
+    { title: "Électronique", url: '/categories/tools.jpg' },
+  
+    { title: "books", url: '/trending/books.jpg' },
+    { title: "home", url: '/trending/home.jpg' },
+    { title: "pc", url: '/trending/pc.jpg' },
+    { title: "sport", url: '/trending/sport.jpg' }
+    
+  ];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleNext = () => {
+    if (currentIndex < Categories.length - 4) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  return (
+    <div>
+      <div className="w-full flex justify-center items-center mt-28">
+        <HeroSection />
+      </div>
+      <div className="p-10 w-full flex flex-col items-center mt-10">
+ 
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-6xl h-72 w-full mt-6">
+  <TrendingCard />
+    {Trending.map((el, i) => (
+      <Card key={i} title={el.title} url={el.url} />
+    ))}
+  </div>
+</div>
+
+      
+<div className="container mx-auto">
+<div className="p-20 bg-blend-color w-full mt-10">
+        <h2 className="text-2xl font-semibold mb-6">Top Catégories</h2>
+        <div className="relative flex items-center">
+          <button 
+            onClick={handlePrev} 
+            className="absolute hover:cursor-pointer  left-0 p-3 bg-gray-100 rounded-full shadow-lg z-10 text-black flex items-center justify-center"
+            style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <AiOutlineLeft size={20} />
+          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4 h-40 overflow-hidden w-full ml-10 mr-10">
+            {Categories.slice(currentIndex, currentIndex + 4).map((category, i) => (
+              <Card key={i} title={category.title} url={category.url} />
+            ))}
+          </div>
+          <button 
+            onClick={handleNext} 
+            className="absolute hover:cursor-pointer  right-0 p-3 bg-gray-100 text-black rounded-full shadow-lg z-10 flex items-center justify-center"
+            style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
           >
-            Read our docs
-          </a>
+            <AiOutlineRight size={20} />
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+</div>
+      {/* Top Categories Section */}
     </div>
+    
   );
 }
