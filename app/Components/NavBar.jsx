@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from "react";
 import Image from "next/image";
-
+import Link from "next/link";
 
 import { FaSearch } from "react-icons/fa";
 import { CiSquarePlus } from "react-icons/ci";
@@ -22,12 +22,12 @@ export default function NavBar() {
 
           <span className="self-center text-2xl font-semibold text-black whitespace-nowrap"></span>
         </a>
-        <button
-          className={`bg-[#FF6E14] hover:opacity-85 transition-all  text-white cursor-pointer py-3 px-4 font-bold rounded-2xl flex items-center  space-x-3 `}
-        >
-          <CiSquarePlus className="text-2xl font-extrabold cursor-pointer" />
-          Déposer une annonce
-        </button>
+        <Link href="/login">
+      <button className="bg-[#FF6E14] hover:opacity-85 transition-all  cursor-pointer text-white p-2 px-4 font-bold rounded-2xl flex items-center space-x-3">
+        <CiSquarePlus className="text-2xl font-extrabold cursor-pointer" />
+        Déposer une annonce
+      </button>
+      </Link>
 
         <div
           className={`relative hidden md:block transition-all duration-300  ease-in-out ${

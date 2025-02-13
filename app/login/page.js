@@ -4,7 +4,7 @@ export default function Login() {
   return (
     <div>
       <NavBar />
-      <div className="max-h-screen p-4 mt-20  md:p-6 flex items-center justify-center">
+      <div className="max-h-screen p-4 mt-20 md:p-6 flex items-center justify-center">
         <div className="mx-auto max-w-md w-full">
           <div className="space-y-8">
             {/* Form Section */}
@@ -25,11 +25,23 @@ export default function Login() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Mot de passe <span className="text-gray-400">*</span>
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  required
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                />
+              </div>
+
               <button
                 type="submit"
                 className="w-full rounded-md bg-[#FF6E14] px-4 py-3 text-center font-semibold text-white hover:bg-[#e66412] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
               >
-                Continuer
+                Se connecter
               </button>
 
               <div className="relative">
@@ -45,7 +57,7 @@ export default function Login() {
                 type="button"
                 className="w-full rounded-md bg-[#FF6E14] px-4 py-3 text-center font-semibold text-white hover:bg-[#e66412] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
               >
-                Se Connecter
+                Créer un compte
               </button>
             </form>
           </div>
