@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import cover from "../assets/cover2.png";  
+ 
 
 import { CiSquarePlus } from "react-icons/ci";
 
@@ -9,7 +9,7 @@ export default function HeroSection() {
     <div
       className="flex justify-center flex-col items-center  p-4 rounded-2xl w-4xl"
       style={{
-        backgroundImage: `url(${cover})`,
+        backgroundImage: `url(/cover2.png)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
