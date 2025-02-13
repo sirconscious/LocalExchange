@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
-import logo2 from "../assets/logo2.png";
+import logo2 from "../assets/Pic/logo2.png";
 import { FaSearch } from "react-icons/fa";
 import { CiSquarePlus } from "react-icons/ci";
 import { GrFavorite } from "react-icons/gr";
@@ -18,10 +18,8 @@ export default function NavBar() {
       <div className="max-w-screen-xl flex flex-wrap items-center justify-center space-x-4 mx-auto p-4">
         <a href="#" className="flex items-center space-x-3 rtl:space-x-reverse">
           {/* <img src="/logo02.png" className="h-10" alt="Logo" />  */}
-          <Image src = "/logo02.png" 
-          alt={logo2}
-          width={20}
-          height={20} />
+          <Image src="/logo2.png" alt="Logo" width={80} height={40} unoptimized />
+
           <span className="self-center text-2xl font-semibold text-black whitespace-nowrap"></span>
         </a>
         <button
