@@ -1,6 +1,6 @@
 import NavBar from "../Components/NavbarSecond";
 import Link from "next/link";
-export default function Login() {
+export default function SignUp() {
   return (
     <div>
       <NavBar />
@@ -9,10 +9,24 @@ export default function Login() {
           <div className="space-y-8">
             {/* Form Section */}
             <h1 className="text-2xl font-semibold text-gray-900 md:text-3xl text-center">
-              Connectez-vous ou créez votre compte leboncoin
+              Créez votre compte pour le marché d'échanges locaux
             </h1>
 
             <form className="space-y-6">
+              {/* Full Name Field */}
+              <div className="space-y-2">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Nom complet <span className="text-gray-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  required
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                />
+              </div>
+
+              {/* Email Field */}
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   E-mail <span className="text-gray-400">*</span>
@@ -25,6 +39,7 @@ export default function Login() {
                 />
               </div>
 
+              {/* Password Field */}
               <div className="space-y-2">
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Mot de passe <span className="text-gray-400">*</span>
@@ -37,13 +52,41 @@ export default function Login() {
                 />
               </div>
 
+              {/* Confirm Password Field */}
+              <div className="space-y-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                  Confirmez le mot de passe <span className="text-gray-400">*</span>
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  required
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                />
+              </div>
+
+              {/* City Field (Optional) */}
+              <div className="space-y-2">
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                  Ville <span className="text-gray-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="city"
+                  required
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                />
+              </div>
+
+              {/* Sign Up Button */}
               <button
                 type="submit"
-                className="w-full rounded-md bg-[#FF6E14] transition-all px-4 py-3 text-center font-semibold text-white hover:bg-[#e66412] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                className="w-full rounded-md hover:border-gray-500 border bg-[#FF6E14] transition-all px-4 py-3 text-center font-semibold text-white hover:bg-[#e66412] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
               >
-                Se connecter
+                Créer un compte
               </button>
 
+              {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300"></div>
@@ -52,12 +95,14 @@ export default function Login() {
                   <span className="bg-white px-4 text-sm text-gray-500">Ou</span>
                 </div>
               </div>
-              <Link href="signup" className="block">
+
+              {/* Login Button */}
+              <Link href="login" className="block">
               <button
                 type="button"
                 className="w-full rounded-md bg-white  transition-all hover:text-white border border-orange-500 px-4 py-3 text-center font-semibold text-orange-500 hover:bg-[#FF6E14] focus:outline-none  "
               >
-                Créer un compte
+                Se connecter
               </button>
               </Link>
             </form>
