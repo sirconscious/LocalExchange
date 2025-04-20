@@ -72,7 +72,7 @@ export default function NavBar() {
                 </a>
               </li>
               <li>
-                <a href="#" className="flex flex-col items-center group relative">
+                <a href="/login" className="flex flex-col items-center group relative">
                   <CgProfile className="text-2xl" />
                   <span className="mt-1">Se connecter</span>
                 </a>

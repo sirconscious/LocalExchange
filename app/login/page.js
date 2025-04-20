@@ -1,6 +1,35 @@
+"use client"
 import NavBar from "../Components/NavbarSecond";
-import Link from "next/link";
-export default function Login() {
+import Link from "next/link"; 
+import { useState } from "react"; 
+import  Cookies  from "js-cookie";  
+import ClientAxios from "../server/AxiosClient";
+export default function Login() { 
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "", 
+  }); 
+  
+  const handleChange = (e) => {
+    const { value, name } = e.target; 
+    setFormData({
+      ...formData,
+      [name]: value,
+    }); 
+    console.log(formData);
+  } 
+  const handleSubmit = (e)=>{
+    e.preventDefault() ; 
+    ClientAxios.post("api/login", formData).then((res)=>{
+      console.log(res.data) ; 
+      Cookies.set("access_token", res.data.token) ; 
+      ClientAxios.defaults.headers.common["Authorization"] = `Bearer ${res.data.access_token}` ; 
+    }).catch((err)=>{
+      console.log(err.response.data) ; 
+    }) ;
+    console.log(formData) ;
+  } 
+  
   return (
     <div>
       <NavBar />
@@ -12,14 +41,16 @@ export default function Login() {
               Connectez-vous ou créez votre compte leboncoin
             </h1>
 
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   E-mail <span className="text-gray-400">*</span>
                 </label>
                 <input
                   type="email"
-                  id="email"
+                  id="email"  
+                  name="email"
+                  onChange={handleChange}
                   required
                   className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
@@ -29,8 +60,10 @@ export default function Login() {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Mot de passe <span className="text-gray-400">*</span>
                 </label>
-                <input
+                <input 
+                onChange={handleChange}
                   type="password"
+                  name="password"
                   id="password"
                   required
                   className="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
