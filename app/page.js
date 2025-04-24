@@ -6,7 +6,6 @@ import TrendingCard from "./Components/TrendingCard"
 import Card from "./Components/Card"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 
 export default function Home() {
   const trending = [
@@ -50,11 +49,33 @@ export default function Home() {
 
   // Stats for the stats section
   const stats = [
-    { value: "50K+", label: "Utilisateurs actifs" },
-    { value: "100K+", label: "Annonces publiées" },
-    { value: "15K+", label: "Transactions par mois" },
-    { value: "4.8/5", label: "Note moyenne" },
+    { value: 50000, label: "Utilisateurs actifs" },
+    { value: 100000, label: "Annonces publiées" },
+    { value: 15000, label: "Transactions par mois" },
+    { value: 4.8, label: "Note moyenne" },
   ]
+  
+  const [animatedStats, setAnimatedStats] = useState(
+    stats.map(() => 0) // Initialize all stats to 0
+  );
+
+  useEffect(() => {
+    const intervals = stats.map((stat, index) => {
+      const increment = Math.ceil(stat.value / 100); // Increment value for smooth animation
+      return setInterval(() => {
+        setAnimatedStats((prev) => {
+          const newStats = [...prev];
+          if (newStats[index] < stat.value) {
+            newStats[index] = Math.min(newStats[index] + increment, stat.value);
+          }
+          return newStats;
+        });
+      }, 20); // Update every 20ms
+    });
+
+    return () => intervals.forEach(clearInterval); // Cleanup intervals on unmount
+  }, [stats]);
+
 
   // Testimonials for the testimonials section
   const testimonials = [
@@ -76,7 +97,7 @@ export default function Home() {
       quote:
         "Une communauté bienveillante et des transactions sécurisées. C'est exactement ce que je cherchais pour vendre mes objets inutilisés.",
       author: "Sophie M.",
-      location: "Casablanca",
+      location: "",
       avatar: "/images/gamer.png",
     },
   ]
@@ -94,17 +115,20 @@ export default function Home() {
 
       {/* Stats Section */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-orange-500 mb-2">{stat.value}</div>
-                <div className="text-sm md:text-base text-gray-600">{stat.label}</div>
+      <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+          {stats.map((stat, index) => (
+            <div key={index} className="text-center">
+              <div className="text-3xl md:text-4xl font-bold text-orange-500 mb-2">
+                {animatedStats[index].toLocaleString()} {/* Format numbers */}
               </div>
-            ))}
-          </div>
+              <div className="text-sm md:text-base text-gray-600">{stat.label}</div>
+            </div>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
+
 
       {/* Trending Section */}
       <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
