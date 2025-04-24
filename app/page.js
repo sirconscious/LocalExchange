@@ -62,21 +62,21 @@ export default function Home() {
       quote:
         "J'ai vendu mon ancien canapé en moins de 24 heures. Le processus était simple et l'acheteur habitait à seulement 10 minutes de chez moi!",
       author: "Marie L.",
-      location: "Lyon",
+      location: "Marrakech",
       avatar: "/images/boy.png",
     },
     {
       quote:
         "LocalExchange m'a permis de trouver des meubles de qualité à petit prix pour mon nouvel appartement. Je recommande vivement!",
       author: "Thomas D.",
-      location: "Paris",
+      location: "Tetouan",
       avatar: "/images/man.png",
     },
     {
       quote:
         "Une communauté bienveillante et des transactions sécurisées. C'est exactement ce que je cherchais pour vendre mes objets inutilisés.",
       author: "Sophie M.",
-      location: "Marseille",
+      location: "Casablanca",
       avatar: "/images/gamer.png",
     },
   ]
