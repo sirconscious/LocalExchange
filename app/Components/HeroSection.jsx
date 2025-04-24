@@ -64,7 +64,7 @@ export default function HeroSection() {
               Déposer une annonce
             </button>
           </Link>
-          <Link href="/register">
+          <Link href="/signup">
             <button className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border border-white/30 py-3 px-6 rounded-full font-bold flex items-center space-x-3 transform transition-all duration-300 hover:scale-105">
               Découvrir comment ça marche
             </button>
