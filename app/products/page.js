@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react"
 import NavBar from "../Components/NavBar"
 import ProductCard from "../Components/ProductCard"
-// import PriceRangeSlider from "../Components/PriceRangeSlider"
-import { Filter, SlidersHorizontal, ChevronDown, ArrowUpDown, ChevronLeft, ChevronRight, X } from "lucide-react"
+import { Filter, SlidersHorizontal, ChevronDown, ArrowUpDown, ChevronLeft, ChevronRight, X, Euro } from "lucide-react";
+import PriceRangeSlider from "../Components/PriceRangeSlider";
 
 export default function ProductExample() {
   // Sample product data
@@ -138,53 +138,53 @@ export default function ProductExample() {
       isNew: false,
       isFeatured: false,
     },
-  ]
+  ];
 
   // Find min and max prices from products
-  const minProductPrice = Math.min(...allProducts.map((product) => product.price))
-  const maxProductPrice = Math.max(...allProducts.map((product) => product.price))
+  const minProductPrice = Math.min(...allProducts.map((product) => product.price));
+  const maxProductPrice = Math.max(...allProducts.map((product) => product.price));
 
   // State for filters and pagination
-  const [filteredProducts, setFilteredProducts] = useState(allProducts)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [productsPerPage] = useState(6)
-  const [selectedCategory, setSelectedCategory] = useState("Tous")
-  const [sortOrder, setSortOrder] = useState("default")
-  const [priceRange, setPriceRange] = useState({ min: minProductPrice, max: maxProductPrice })
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
-  const [activeFilters, setActiveFilters] = useState([])
+  const [filteredProducts, setFilteredProducts] = useState(allProducts);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(6);
+  const [selectedCategory, setSelectedCategory] = useState("Tous");
+  const [sortOrder, setSortOrder] = useState("default");
+  const [priceRange, setPriceRange] = useState({ min: minProductPrice, max: maxProductPrice });
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState([]);
 
   // Extract unique categories
-  const categories = ["Tous", ...new Set(allProducts.map((product) => product.category))]
+  const categories = ["Tous", ...new Set(allProducts.map((product) => product.category))];
 
   // Apply filters and sorting
   useEffect(() => {
-    let result = [...allProducts]
-    const newActiveFilters = []
+    let result = [...allProducts];
+    const newActiveFilters = [];
 
     // Apply category filter
     if (selectedCategory !== "Tous") {
-      result = result.filter((product) => product.category === selectedCategory)
-      newActiveFilters.push({ type: "category", value: selectedCategory })
+      result = result.filter((product) => product.category === selectedCategory);
+      newActiveFilters.push({ type: "category", value: selectedCategory });
     }
 
     // Apply price range filter
-    result = result.filter((product) => product.price >= priceRange.min && product.price <= priceRange.max)
+    result = result.filter((product) => product.price >= priceRange.min && product.price <= priceRange.max);
 
     if (priceRange.min > minProductPrice || priceRange.max < maxProductPrice) {
       newActiveFilters.push({
         type: "price",
         value: `${priceRange.min.toFixed(0)}€ - ${priceRange.max.toFixed(0)}€`,
-      })
+      });
     }
 
     // Apply sorting
     if (sortOrder === "price-asc") {
-      result.sort((a, b) => a.price - b.price)
-      newActiveFilters.push({ type: "sort", value: "Prix croissant" })
+      result.sort((a, b) => a.price - b.price);
+      newActiveFilters.push({ type: "sort", value: "Prix croissant" });
     } else if (sortOrder === "price-desc") {
-      result.sort((a, b) => b.price - a.price)
-      newActiveFilters.push({ type: "sort", value: "Prix décroissant" })
+      result.sort((a, b) => b.price - a.price);
+      newActiveFilters.push({ type: "sort", value: "Prix décroissant" });
     } else if (sortOrder === "newest") {
       // This is a simplified sort based on the "Il y a X" text
       const timeMap = {
@@ -193,53 +193,53 @@ export default function ProductExample() {
         jours: 24,
         semaine: 168,
         semaines: 168,
-      }
+      };
 
       result.sort((a, b) => {
-        const aMatch = a.timePosted.match(/Il y a (\d+) (\w+)/)
-        const bMatch = b.timePosted.match(/Il y a (\d+) (\w+)/)
+        const aMatch = a.timePosted.match(/Il y a (\d+) (\w+)/);
+        const bMatch = b.timePosted.match(/Il y a (\d+) (\w+)/);
 
         if (aMatch && bMatch) {
-          const aTime = Number.parseInt(aMatch[1]) * timeMap[aMatch[2]]
-          const bTime = Number.parseInt(bMatch[1]) * timeMap[bMatch[2]]
-          return aTime - bTime
+          const aTime = Number.parseInt(aMatch[1]) * timeMap[aMatch[2]];
+          const bTime = Number.parseInt(bMatch[1]) * timeMap[bMatch[2]];
+          return aTime - bTime;
         }
-        return 0
-      })
-      newActiveFilters.push({ type: "sort", value: "Plus récent" })
+        return 0;
+      });
+      newActiveFilters.push({ type: "sort", value: "Plus récent" });
     }
 
-    setActiveFilters(newActiveFilters)
-    setFilteredProducts(result)
-    setCurrentPage(1) // Reset to first page when filters change
-  }, [selectedCategory, sortOrder, priceRange.min, priceRange.max]) // Changed dependency array
+    setActiveFilters(newActiveFilters);
+    setFilteredProducts(result);
+    // setCurrentPage(1); // Reset to first page when filters change
+  }, [selectedCategory, sortOrder, priceRange.min, priceRange.max, allProducts, minProductPrice, maxProductPrice]);
 
   // Get current products for pagination
-  const indexOfLastProduct = currentPage * productsPerPage
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct)
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage)
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   // Change page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber)
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   // Reset all filters
   const resetFilters = () => {
-    setSelectedCategory("Tous")
-    setSortOrder("default")
-    setPriceRange({ min: minProductPrice, max: maxProductPrice })
-  }
+    setSelectedCategory("Tous");
+    setSortOrder("default");
+    setPriceRange({ min: minProductPrice, max: maxProductPrice });
+  };
 
   // Remove a specific filter
   const removeFilter = (filter) => {
     if (filter.type === "category") {
-      setSelectedCategory("Tous")
+      setSelectedCategory("Tous");
     } else if (filter.type === "price") {
-      setPriceRange({ min: minProductPrice, max: maxProductPrice })
+      setPriceRange({ min: minProductPrice, max: maxProductPrice });
     } else if (filter.type === "sort") {
-      setSortOrder("default")
+      setSortOrder("default");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -312,7 +312,13 @@ export default function ProductExample() {
               </div>
 
               {/* Price Range */}
-             
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-gray-700 mb-4 flex items-center">
+                  <Euro className="h-4 w-4 mr-2 text-orange-500" />
+                  Fourchette de prix
+                </h3>
+                <PriceRangeSlider min={minProductPrice} max={maxProductPrice} onChange={setPriceRange} />
+              </div>
 
               {/* Sort Order */}
               <div>
@@ -371,14 +377,13 @@ export default function ProductExample() {
               </div>
 
               {/* Price Range */}
-              {/* <div className="mb-8">
-                <h3 className="text-sm font-medium text-gray-700 mb-4">Fourchette de prix</h3> */}
-                {/* <PriceRangeSlider min={minProductPrice} max={maxProductPrice} onChange={setPriceRange} /> */}
-                {/* <div className="flex justify-between mt-3 text-sm text-gray-600">
-                  <span>{priceRange.min.toFixed(0)}€</span>
-                  <span>{priceRange.max.toFixed(0)}€</span>
-                </div>
-              </div> */}
+              <div className="mb-8">
+                <h3 className="text-sm font-medium text-gray-700 mb-4 flex items-center">
+                  <Euro className="h-4 w-4 mr-2 text-orange-500" />
+                  Fourchette de prix
+                </h3>
+                <PriceRangeSlider min={minProductPrice} max={maxProductPrice} onChange={setPriceRange} />
+              </div>
 
               {/* Sort Order */}
               <div>
@@ -490,10 +495,10 @@ export default function ProductExample() {
               </div>
             )}
 
-            {/* Pagination */}
+            {/* Pagination - Fixed Version */}
             {filteredProducts.length > productsPerPage && (
               <div className="mt-10 flex justify-center">
-                <nav className="flex items-center space-x-2">
+                <nav className="flex items-center gap-1">
                   <button
                     onClick={() => paginate(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
@@ -503,42 +508,61 @@ export default function ProductExample() {
                     <ChevronLeft className="h-5 w-5" />
                   </button>
 
-                  <div className="flex space-x-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => {
-                      // Show limited page numbers with ellipsis for better UX
-                      if (
-                        number === 1 ||
-                        number === totalPages ||
-                        (number >= currentPage - 1 && number <= currentPage + 1)
-                      ) {
-                        return (
-                          <button
-                            key={number}
-                            onClick={() => paginate(number)}
-                            className={`px-4 py-2 rounded-md ${
-                              currentPage === number
-                                ? "bg-orange-500 text-white"
-                                : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                            }`}
-                            aria-label={`Page ${number}`}
-                            aria-current={currentPage === number ? "page" : undefined}
-                          >
-                            {number}
-                          </button>
-                        )
-                      } else if (
-                        (number === currentPage - 2 && currentPage > 3) ||
-                        (number === currentPage + 2 && currentPage < totalPages - 2)
-                      ) {
-                        return (
-                          <span key={number} className="px-4 py-2">
-                            ...
-                          </span>
-                        )
-                      }
-                      return null
-                    })}
-                  </div>
+                  {/* Always show first page */}
+                  <button
+                    onClick={() => paginate(1)}
+                    className={`px-4 py-2 rounded-md ${
+                      currentPage === 1
+                        ? "bg-orange-500 text-white"
+                        : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    1
+                  </button>
+
+                  {/* Show ellipsis if current page is far from start */}
+                  {currentPage > 3 && (
+                    <span className="px-4 py-2">...</span>
+                  )}
+
+                  {/* Show pages around current page */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => {
+                    if (number > 1 && number < totalPages && Math.abs(number - currentPage) <= 1) {
+                      return (
+                        <button
+                          key={number}
+                          onClick={() => paginate(number)}
+                          className={`px-4 py-2 rounded-md ${
+                            currentPage === number
+                              ? "bg-orange-500 text-white"
+                              : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {number}
+                        </button>
+                      );
+                    }
+                    return null;
+                  })}
+
+                  {/* Show ellipsis if current page is far from end */}
+                  {currentPage < totalPages - 2 && (
+                    <span className="px-4 py-2">...</span>
+                  )}
+
+                  {/* Always show last page if there's more than one page */}
+                  {totalPages > 1 && (
+                    <button
+                      onClick={() => paginate(totalPages)}
+                      className={`px-4 py-2 rounded-md ${
+                        currentPage === totalPages
+                          ? "bg-orange-500 text-white"
+                          : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {totalPages}
+                    </button>
+                  )}
 
                   <button
                     onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
@@ -555,5 +579,5 @@ export default function ProductExample() {
         </div>
       </div>
     </div>
-  )
+  );
 }

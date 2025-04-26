@@ -1,95 +1,139 @@
-"use client"
-import { useState, useEffect, useRef } from "react"
+"use client";
+import React, { useState, useEffect } from 'react';
 
 export default function PriceRangeSlider({ min, max, onChange }) {
-  const [minVal, setMinVal] = useState(min)
-  const [maxVal, setMaxVal] = useState(max)
-  const minValRef = useRef(min)
-  const maxValRef = useRef(max)
-  const range = useRef(null)
+  const [minVal, setMinVal] = useState(min);
+  const [maxVal, setMaxVal] = useState(max);
 
-  // Convert to percentage
   const getPercent = (value) => {
-    return Math.round(((value - min) / (max - min)) * 100)
-  }
+    return Math.round(((value - min) / (max - min)) * 100);
+  };
 
-  // Set width of the range to decrease from the left side
+  const minPercent = getPercent(minVal);
+  const maxPercent = getPercent(maxVal);
+
   useEffect(() => {
-    const minPercent = getPercent(minVal)
-    const maxPercent = getPercent(maxValRef.current)
+    setMinVal(min);
+    setMaxVal(max);
+  }, [min, max]);
 
-    if (range.current) {
-      range.current.style.left = `${minPercent}%`
-      range.current.style.width = `${maxPercent - minPercent}%`
-    }
-  }, [minVal, min, max])
-
-  // Set width of the range to decrease from the right side
   useEffect(() => {
-    const minPercent = getPercent(minValRef.current)
-    const maxPercent = getPercent(maxVal)
-
-    if (range.current) {
-      range.current.style.width = `${maxPercent - minPercent}%`
-    }
-  }, [maxVal, min, max])
-
-  // Get min and max values when their state changes
-  useEffect(() => {
-    // Use a debounce to prevent too many updates
-    const timer = setTimeout(() => {
-      onChange({ min: minVal, max: maxVal })
-    }, 100)
-
-    return () => clearTimeout(timer)
-  }, [minVal, maxVal, onChange])
+    onChange({ min: minVal, max: maxVal });
+  }, [minVal, maxVal, onChange]);
 
   return (
-    <div className="relative h-7">
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={minVal}
-        onChange={(event) => {
-          const value = Math.min(Number(event.target.value), maxVal - 1)
-          setMinVal(value)
-          minValRef.current = value
-        }}
-        className="absolute pointer-events-none appearance-none z-30 h-2 w-full opacity-0 cursor-pointer"
-      />
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={maxVal}
-        onChange={(event) => {
-          const value = Math.max(Number(event.target.value), minVal + 1)
-          setMaxVal(value)
-          maxValRef.current = value
-        }}
-        className="absolute pointer-events-none appearance-none z-30 h-2 w-full opacity-0 cursor-pointer"
-      />
+    <div className="relative">
+      <div className="flex items-center justify-between mb-5">
+        <div className="relative">
+          <input
+            type="number"
+            value={minVal}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              setMinVal(Math.min(value, maxVal - 1));
+            }}
+            className="w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+          <span className="absolute left-2 -top-6 text-xs text-gray-500">Min</span>
+        </div>
+        <div className="relative">
+          <input
+            type="number"
+            value={maxVal}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              setMaxVal(Math.max(value, minVal + 1));
+            }}
+            className="w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+          <span className="absolute right-2 -top-6 text-xs text-gray-500">Max</span>
+        </div>
+      </div>
 
-      <div className="relative z-10 h-2">
-        {/* Base line */}
-        <div className="absolute z-10 left-0 right-0 bottom-0 top-0 rounded-md bg-gray-200"></div>
-
-        {/* Range line */}
-        <div ref={range} className="absolute z-20 top-0 bottom-0 rounded-md bg-orange-500"></div>
-
-        {/* Min thumb */}
+      <div className="relative h-1 bg-gray-200 rounded-md w-full">
         <div
-          className="absolute z-30 w-5 h-5 top-1/2 -mt-2.5 -ml-2.5 rounded-full bg-orange-500 shadow cursor-grab"
-          style={{ left: `${getPercent(minVal)}%` }}
-        ></div>
+          className="absolute h-1 bg-orange-500 rounded-md"
+          style={{
+            left: `${minPercent}%`,
+            width: `${maxPercent - minPercent}%`,
+          }}
+        />
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={minVal}
+          step={1}
+          onChange={(e) => {
+            const value = Math.min(Number(e.target.value), maxVal - 1);
+            setMinVal(value);
+          }}
+          className="absolute w-full h-1 appearance-none pointer-events-none bg-transparent"
+          style={{
+            WebkitAppearance: 'none',
+            zIndex: 3,
+          }}
+        />
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={maxVal}
+          step={1}
+          onChange={(e) => {
+            const value = Math.max(Number(e.target.value), minVal + 1);
+            setMaxVal(value);
+          }}
+          className="absolute w-full h-1 appearance-none pointer-events-none bg-transparent"
+          style={{
+            WebkitAppearance: 'none',
+            zIndex: 4,
+          }}
+        />
 
-        {/* Max thumb */}
-        <div
-          className="absolute z-30 w-5 h-5 top-1/2 -mt-2.5 -ml-2.5 rounded-full bg-orange-500 shadow cursor-grab"
-          style={{ left: `${getPercent(maxVal)}%` }}
-        ></div>
+        {/* Custom styling for the range inputs */}
+        <style jsx>{`
+          input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            pointer-events: all;
+            width: 18px;
+            height: 18px;
+            background-color: white;
+            border: 2px solid #FF8C00;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          }
+
+          input[type="range"]::-moz-range-thumb {
+            pointer-events: all;
+            width: 18px;
+            height: 18px;
+            background-color: white;
+            border: 2px solid #FF8C00;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          }
+
+          input[type="range"]:focus::-webkit-slider-thumb {
+            background-color: white;
+            border: 2px solid #FF8C00;
+            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
+          }
+
+          input[type="range"]:focus::-moz-range-thumb {
+            background-color: white;
+            border: 2px solid #FF8C00;
+            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
+          }
+        `}</style>
+      </div>
+
+      <div className="flex justify-between mt-3">
+        <span className="text-xs text-gray-500">{min.toFixed(0)}€</span>
+        <span className="text-xs text-gray-500">{max.toFixed(0)}€</span>
       </div>
     </div>
-  )
+  );
 }

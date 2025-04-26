@@ -1,226 +1,114 @@
-// "use client";
-// import React, { useState } from "react";
-// import Image from "next/image";
-// import Link from "next/link";
-
-// import { FaSearch, FaBars, FaTimes } from "react-icons/fa";
-// import { CiSquarePlus } from "react-icons/ci";
-// import { GrFavorite } from "react-icons/gr";
-// import { LuMessageCircle } from "react-icons/lu";
-// import { CgProfile } from "react-icons/cg";
-// import Filter from "./Filter";
-
-// export default function NavBar() {
-//   const [click, handleFocus] = useState(false);
-//   const [menuOpen, setMenuOpen] = useState(false);
-
-//   return (
-//     <>
-//       <nav className="bg-white shadow-lg">
-//         <div className="max-w-screen-xl flex items-center justify-between mx-auto p-4">
-//           {/* Logo */}
-//           <a href="#" className="flex items-center space-x-3">
-//             <Image src="/logo2.png" alt="Logo" width={160} height={100} unoptimized />
-//           </a>
-
-//           {/* Search Bar (always visible) */}
-//           <div
-//             className={`relative transition-all duration-300 ease-in-out ${
-//               click ? "w-[300px]" : "w-[200px]"
-//             }`}
-//             onMouseLeave={() => handleFocus(false)}
-//             onClick={() => handleFocus(true)}
-//           >
-//             <input
-//               type="text"
-//               className="block w-full py-3 px-4 text-sm text-black border-none outline-0 rounded-lg bg-gray-200 focus:ring-gray-500"
-//               placeholder="Rechercher sur LocalExchanges"
-//             />
-//             <div className="absolute inset-y-0 end-2 flex items-center pointer-events-none">
-//               <FaSearch className="w-4 h-5 text-orange-500 font-bold" />
-//             </div>
-//           </div>
-
-//           {/* Burger Menu (Small Screens) */}
-//           <button
-//             className="md:hidden text-gray-600 text-2xl p-2"
-//             onClick={() => setMenuOpen(!menuOpen)}
-//           >
-//             {menuOpen ? <FaTimes /> : <FaBars />}
-//           </button>
-
-//           {/* Desktop Menu */}
-//           <div className="hidden md:flex items-center space-x-6">
-//             <Link href="/login">
-//               <button className="bg-[#FF6E14] hover:opacity-85 transition-all text-white p-2 px-4 font-bold rounded-2xl flex items-center space-x-3">
-//                 <CiSquarePlus className="text-2xl font-extrabold" />
-//                 Déposer une annonce
-//               </button>
-//             </Link>
-
-//             <ul className="flex space-x-6">
-//               <li>
-//                 <a href="#" className="flex flex-col items-center group relative">
-//                   <GrFavorite className="text-2xl" />
-//                   <span className="mt-1">Favoris</span>
-//                 </a>
-//               </li>
-//               <li>
-//                 <a href="#" className="flex flex-col items-center group relative">
-//                   <LuMessageCircle className="text-2xl" />
-//                   <span className="mt-1">Message</span>
-//                 </a>
-//               </li>
-//               <li>
-//                 <a href="/login" className="flex flex-col items-center group relative">
-//                   <CgProfile className="text-2xl" />
-//                   <span className="mt-1">Se connecter</span>
-//                 </a>
-//               </li>
-//             </ul>
-//           </div>
-//         </div>
-
-//         {/* Mobile Menu (Dropdown) */}
-//         {menuOpen && (
-//           <div className="md:hidden flex flex-col items-center space-y-4 p-4 bg-white border-t shadow-lg">
-//             <Link href="/login">
-//               <button className="bg-[#FF6E14] hover:opacity-85 transition-all text-white p-2 px-4 font-bold rounded-2xl flex items-center space-x-3">
-//                 <CiSquarePlus className="text-2xl font-extrabold" />
-//                 Déposer une annonce
-//               </button>
-//             </Link>
-
-//             <a href="#" className="flex items-center space-x-2">
-//               <GrFavorite className="text-2xl" />
-//               <span>Favoris</span>
-//             </a>
-
-//             <a href="#" className="flex items-center space-x-2">
-//               <LuMessageCircle className="text-2xl" />
-//               <span>Message</span>
-//             </a>
-
-//             <a href="#" className="flex items-center space-x-2">
-//               <CgProfile className="text-2xl" />
-//               <span>Se connecter</span>
-//             </a>
-//           </div>
-//         )}
-//       </nav>
-
-//       {/* Filter (Hidden on Small Screens) */}
-//       <div className="hidden md:block">
-//         <Filter />
-//       </div>
-//     </>
-//   );
-// }
 "use client"
 import { useState, useEffect } from "react"
-import Image from "next/image"
 import Link from "next/link"
-import { Search, Menu, X, Heart, MessageCircle, User, Plus } from "lucide-react"
-import Filter from "./Filter"
+import { Menu, X, Search, User, Heart, Bell } from "lucide-react"
 
 export default function NavBar() {
-  const [searchFocused, setSearchFocused] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [searchFocused, setSearchFocused] = useState(false)
 
-  // Handle scroll effect for navbar
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setScrolled(true)
-      } else {
-        setScrolled(false)
-      }
-    }
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     if (window.scrollY > 10) {
+  //       setScrolled(true)
+  //     } else {
+  //       setScrolled(false)
+  //     }
+  //   }
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  //   window.addEventListener("scroll", handleScroll)
+  //   return () => window.removeEventListener("scroll", handleScroll)
+  // }, [])
 
   return (
-    <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md py-2" : "bg-white py-4"
+    <nav
+      className={`fixed w-full z-50 transition-all duration-300 ${
+        scrolled ? "bg-white shadow-md py-3" : "bg-white/95 backdrop-blur-sm py-5"
       }`}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <Image src="/logo2.png" alt="LocalExchange" width={140} height={50} unoptimized className="h-10 w-auto" />
-          </Link>
+          <div className="flex-shrink-0">
+            <Link href="/" className="flex items-center">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-xl mr-2">
+                LE
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                LocalExchange
+              </span>
+            </Link>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-10">
+            <Link href="/"                className="text-orange-500 font-medium border-b-2 border-orange-500 pb-1 transition-colors duration-200"
+>
+              Accueil
+            </Link>
+            <Link 
+             className="text-gray-700 hover:text-orange-500 font-medium transition-colors duration-200"
+              href="/product-example"
+            >
+              Produits
+            </Link>
+            <Link
+              href="/contact"
+              className="text-gray-700 hover:text-orange-500 font-medium transition-colors duration-200"
+            >
+              Contact
+            </Link>
+            <Link
+              href="/about"
+              className="text-gray-700 hover:text-orange-500 font-medium transition-colors duration-200"
+            >
+              À propos
+            </Link>
+          </div>
 
           {/* Search Bar */}
-          <div
-            className={`relative hidden md:block transition-all duration-300 ${
-              searchFocused ? "w-[400px]" : "w-[300px]"
-            }`}
-          >
-            <div className="relative">
-              <input
-                type="text"
-                className="w-full py-2.5 pl-10 pr-4 text-sm text-gray-700 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300 focus:bg-white transition-all"
-                placeholder="Rechercher sur LocalExchange"
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
-              />
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <Search className="w-5 h-5 text-orange-500" />
-              </div>
+          <div className={`hidden md:block relative transition-all duration-300 ${searchFocused ? "w-80" : "w-64"}`}>
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              className="w-full py-2 pl-10 pr-4 rounded-full bg-gray-100 focus:bg-white border border-transparent focus:border-orange-300 focus:ring-2 focus:ring-orange-200 outline-none transition-all"
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+            />
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <Search className="h-5 w-5 text-gray-400" />
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-          >
-            {menuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-
-          {/* Desktop Navigation */}
+          {/* Desktop Action Icons */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/login">
-              <button className="bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-full font-medium flex items-center space-x-2 transition-all duration-300 shadow-sm hover:shadow-md">
-                <Plus size={18} />
-                <span>Déposer une annonce</span>
-              </button>
+            <button className="text-gray-600 hover:text-orange-500 transition-colors duration-200">
+              <Heart className="h-6 w-6" />
+            </button>
+            <button className="text-gray-600 hover:text-orange-500 transition-colors duration-200">
+              <Bell className="h-6 w-6" />
+            </button>
+            <Link href="/login" className="text-gray-600 hover:text-orange-500 transition-colors duration-200">
+              <User className="h-6 w-6" />
             </Link>
+            <Link
+              href="/login"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+            >
+              Déposer une annonce
+            </Link>
+          </div>
 
-            <nav className="flex items-center space-x-6">
-              <Link href="#" className="nav-link group">
-                <div className="flex flex-col items-center">
-                  <Heart className="w-5 h-5 text-gray-700 group-hover:text-orange-500 transition-colors" />
-                  <span className="mt-1 text-sm text-gray-700 group-hover:text-orange-500 transition-colors">
-                    Favoris
-                  </span>
-                </div>
-              </Link>
-
-              <Link href="#" className="nav-link group">
-                <div className="flex flex-col items-center">
-                  <MessageCircle className="w-5 h-5 text-gray-700 group-hover:text-orange-500 transition-colors" />
-                  <span className="mt-1 text-sm text-gray-700 group-hover:text-orange-500 transition-colors">
-                    Messages
-                  </span>
-                </div>
-              </Link>
-
-              <Link href="/login" className="nav-link group">
-                <div className="flex flex-col items-center">
-                  <User className="w-5 h-5 text-gray-700 group-hover:text-orange-500 transition-colors" />
-                  <span className="mt-1 text-sm text-gray-700 group-hover:text-orange-500 transition-colors">
-                    Se connecter
-                  </span>
-                </div>
-              </Link>
-            </nav>
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-gray-700 hover:text-orange-500 focus:outline-none"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
+            </button>
           </div>
         </div>
 
@@ -229,52 +117,74 @@ export default function NavBar() {
           <div className="relative">
             <input
               type="text"
-              className="w-full py-2.5 pl-10 pr-4 text-sm text-gray-700 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-300 focus:bg-white transition-all"
-              placeholder="Rechercher sur LocalExchange"
+              placeholder="Rechercher..."
+              className="w-full py-2.5 pl-10 pr-4 rounded-full bg-gray-100 border border-transparent focus:border-orange-300 focus:ring-2 focus:ring-orange-200 outline-none"
             />
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Search className="w-5 h-5 text-orange-500" />
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+              <Search className="h-5 w-5 text-gray-400" />
             </div>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        {menuOpen && (
-          <div className="md:hidden mt-4 py-4 bg-white border-t border-gray-100 animate-fadeIn">
-            <div className="flex flex-col space-y-4">
-              <Link href="/login">
-                <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-full font-medium flex items-center justify-center space-x-2 transition-colors">
-                  <Plus size={18} />
-                  <span>Déposer une annonce</span>
-                </button>
-              </Link>
+        <div
+          className={`md:hidden transition-all duration-300 ease-in-out ${
+            isOpen ? "max-h-96 opacity-100 mt-4" : "max-h-0 opacity-0 overflow-hidden"
+          }`}
+        >
+          <div className="pt-2 pb-4 space-y-1 border-t border-gray-200 mt-4">
+            <Link
+              href="/"
+              className="block py-2.5 px-4 rounded-lg hover:bg-orange-50 text-gray-700 hover:text-orange-500 transition-colors duration-200"
+            >
+              Accueil
+            </Link>
+            <Link
+              href="/product-example"
+              className="block py-2.5 px-4 rounded-lg bg-orange-50 text-orange-500 font-medium transition-colors duration-200"
+            >
+              Produits
+            </Link>
+            <Link
+              href="/contact"
+              className="block py-2.5 px-4 rounded-lg hover:bg-orange-50 text-gray-700 hover:text-orange-500 transition-colors duration-200"
+            >
+              Contact
+            </Link>
+            <Link
+              href="/about"
+              className="block py-2.5 px-4 rounded-lg hover:bg-orange-50 text-gray-700 hover:text-orange-500 transition-colors duration-200"
+            >
+              À propos
+            </Link>
+          </div>
 
-              <Link href="#" className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <Heart className="w-5 h-5 text-gray-700" />
-                <span className="text-gray-700">Favoris</span>
-              </Link>
-
-              <Link href="#" className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                <MessageCircle className="w-5 h-5 text-gray-700" />
-                <span className="text-gray-700">Messages</span>
-              </Link>
-
+          <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="flex items-center justify-around">
+              <button className="p-2 rounded-full text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-colors duration-200">
+                <Heart className="h-6 w-6" />
+              </button>
+              <button className="p-2 rounded-full text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-colors duration-200">
+                <Bell className="h-6 w-6" />
+              </button>
               <Link
                 href="/login"
-                className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                className="p-2 rounded-full text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-colors duration-200"
               >
-                <User className="w-5 h-5 text-gray-700" />
-                <span className="text-gray-700">Se connecter</span>
+                <User className="h-6 w-6" />
+              </Link>
+            </div>
+            <div className="mt-4">
+              <Link
+                href="/login"
+                className="block text-center bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-lg font-medium hover:shadow-md transition-all duration-300"
+              >
+                Déposer une annonce
               </Link>
             </div>
           </div>
-        )}
-
-        {/* Filter - Desktop Only */}
-        <div className="hidden md:block mt-4">
-          <Filter />
         </div>
       </div>
-    </header>
+    </nav>
   )
 }
