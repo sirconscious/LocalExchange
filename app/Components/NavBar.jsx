@@ -50,7 +50,7 @@ export default function NavBar() {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <Link
-              href="/product-example"
+              href="/products"
               className="text-gray-700 hover:text-orange-500 font-medium transition-colors duration-200 relative group"
             >
               Produits
@@ -98,7 +98,7 @@ export default function NavBar() {
               <User className="h-6 w-6" />
             </Link>
             <Link
-              href="/login"
+              href="/products/add"
               className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105"
             >
               Déposer une annonce

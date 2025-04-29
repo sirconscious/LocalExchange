@@ -624,7 +624,7 @@ export default function SignUp() {
       <NavBar />
 
       <div
-        className={`py-10 px-4 sm:px-6 md:py-12 transition-all duration-700 transform ${animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+        className={`py-10 px-4 sm:px-6 md:py-12 transition-all duration-700 mt-10 transform ${animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
       >
         <div className="max-w-md mx-auto">
           {/* Form Card */}

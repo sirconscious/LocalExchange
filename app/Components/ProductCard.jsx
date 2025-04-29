@@ -36,7 +36,7 @@ export default function ProductCard({
   })
 
   return (
-    <Link href={`/product/${id}`}>
+    <Link href={`/products/${id}`}>
       <div className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col border border-gray-200 hover:border-gray-300 hover:-translate-y-1">
         {/* Image Container */}
         <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">

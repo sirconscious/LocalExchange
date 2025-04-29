@@ -52,13 +52,13 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
     images: ["/categories/2148849223.jpg", "/categories/books.jpg", "/categories/car.jpg", "/categories/caraccessories.jpg"],
     seller: {
       id: "s789012",
-      name: "Sophie M.",
+      name: "Mark M.",
       memberSince: "Avril 2022",
       responseRate: 98,
       responseTime: "En général moins d'une heure",
       rating: 4.8,
       reviews: 47,
-      avatar: "/images/avatar-2.jpg",
+      avatar: "/images/man.png",
       verified: true,
     },
     relatedProducts: [
