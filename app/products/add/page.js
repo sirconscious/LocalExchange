@@ -1,341 +1,586 @@
-'use client';
+"use client"
 
-import React, { useState } from 'react';
-import NavBar from '../../Components/NavBar';
-import FormField from '../../components/FormField';
-import ImagePreview from '../../components/ImagePreview';
-import { Upload, Check } from 'lucide-react';
-import { toast } from "sonner";
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  Upload,
+  Check,
+  ArrowRight,
+  ArrowLeft,
+  Camera,
+  MapPin,
+  Tag,
+  Euro,
+  Info,
+  FileText,
+  Phone,
+  AlertCircle,
+} from "lucide-react"
+import { toast } from "sonner"
+import FormField from "../../Components/FormField"
+import ImagePreview from "../../components/ImagePreview"
+import ProgressIndicator from "../../components/progress-indicator"
+import { useRouter } from "next/navigation"
+import Cookies from 'js-cookie'
 
-const categories = [
-  'Electronics', 'Home & Garden', 'Clothing', 'Sports', 
-  'Beauty & Health', 'Toys', 'Automotive', 'Books', 'Other'
-];
+const conditions = ["Neuf", "Comme neuf", "Bon état", "État moyen", "À rénover"]
 
-const AddProduct = () => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('');
-  const [location, setLocation] = useState('');
-  const [contactInfo, setContactInfo] = useState('');
-  const [images, setImages] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeSection, setActiveSection] = useState('details');
+export default function AddProduct() {
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+  const [price, setPrice] = useState("")
+  const [category, setCategory] = useState("")
+  const [condition, setCondition] = useState("")
+  const [location, setLocation] = useState("")
+  const [contactInfo, setContactInfo] = useState("")
+  const [images, setImages] = useState([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [currentStep, setCurrentStep] = useState(1)
+  const [categories, setCategories] = useState([])
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true)
+  const totalSteps = 3
+  const router = useRouter()
+
+  // Get the bearer token from cookies
+  const getAuthToken = () => {
+    const token = Cookies.get('access_token')
+    if (!token) {
+      toast.error("Session expirée", {
+        description: "Veuillez vous reconnecter pour continuer.",
+      })
+      router.push('/login')
+      return null
+    }
+    return token
+  }
+
+  // Fetch categories when component mounts
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const token = getAuthToken()
+      if (!token) return
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/categorys', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          }
+        })
+        if (!response.ok) {
+          if (response.status === 401) {
+            toast.error("Session expirée", {
+              description: "Veuillez vous reconnecter pour continuer.",
+            })
+            router.push('/login')
+            return
+          }
+          throw new Error('Failed to fetch categories')
+        }
+        const data = await response.json()
+        setCategories(data)
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+        toast.error("Erreur lors du chargement des catégories", {
+          description: "Veuillez rafraîchir la page pour réessayer.",
+        })
+      } finally {
+        setIsLoadingCategories(false)
+      }
+    }
+
+    fetchCategories()
+  }, [router])
 
   const handleImageUpload = (e) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setImages(prev => [...prev, ...newFiles]);
-      toast.success(`${newFiles.length} image${newFiles.length > 1 ? 's' : ''} added!`);
+      const newFiles = Array.from(e.target.files)
+      if (images.length + newFiles.length > 5) {
+        toast.error("Maximum 5 images allowed")
+        return
+      }
+      setImages((prev) => [...prev, ...newFiles])
+      toast.success(
+        `${newFiles.length} image${newFiles.length > 1 ? "s" : ""} ajoutée${newFiles.length > 1 ? "s" : ""}!`
+      )
     }
-  };
+  }
 
   const removeImage = (index) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-    toast.info("Image removed");
-  };
+    setImages((prev) => prev.filter((_, i) => i !== index))
+    toast.info("Image supprimée")
+  }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log({ title, description, price, category, location, contactInfo, images });
-      setIsSubmitting(false);
-      
-      toast.success("Product added successfully!", {
-        description: "Your item has been listed on GlowMarket."
-      });
-      
-      // Reset form or redirect
-    }, 1500);
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
 
-  const handleSectionChange = (section) => {
-    setActiveSection(section);
-  };
+    const token = getAuthToken()
+    if (!token) return
+
+    try {
+      // Create FormData object to handle file uploads
+      const formData = new FormData()
+      formData.append('nom', title)
+      formData.append('description', description)
+      formData.append('prix', price)
+      formData.append('localisation', location)
+      formData.append('categorie_id', category)
+      formData.append('condition', condition)
+      formData.append('contactInfo', contactInfo)
+
+      // Append all images
+      images.forEach((image, index) => {
+        formData.append('images[]', image)
+      })
+
+      // Send request to API
+      const response = await fetch('http://127.0.0.1:8000/api/product', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        },
+        body: formData,
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error("Session expirée", {
+            description: "Veuillez vous reconnecter pour continuer.",
+          })
+          router.push('/login')
+          return
+        }
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Une erreur est survenue lors de la création du produit')
+      }
+
+      const data = await response.json()
+      
+      toast.success("Produit ajouté avec succès!", {
+        description: "Votre article a été publié sur LocalExchange.",
+      })
+
+      // Redirect to the product page
+      router.push(`/products/${data.id}`)
+    } catch (error) {
+      console.error('Error creating product:', error)
+      toast.error("Erreur lors de la création du produit", {
+        description: error.message || "Une erreur est survenue. Veuillez réessayer.",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const nextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep((prev) => prev + 1)
+    }
+  }
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1)
+    }
+  }
+
+  const isStepComplete = (step) => {
+    switch (step) {
+      case 1:
+        return title.trim() !== "" && description.trim() !== "" && category !== ""
+      case 2:
+        return images.length > 0
+      case 3:
+        return location.trim() !== "" && price.trim() !== ""
+      default:
+        return false
+    }
+  }
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6"
+          >
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
+                <FileText className="mr-2 h-5 w-5 text-orange-500" />
+                Informations sur le produit
+              </h2>
+              <p className="text-gray-500">Donnez un maximum de détails pour attirer l'attention des acheteurs.</p>
+            </div>
+
+            <FormField label="Titre de l'annonce" htmlFor="title" required icon={<Tag className="h-4 w-4" />}>
+              <input
+                type="text"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Que vendez-vous ?"
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200"
+                required
+              />
+            </FormField>
+
+            <FormField label="Description" htmlFor="description" required icon={<Info className="h-4 w-4" />}>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Décrivez votre article (état, caractéristiques, etc.)"
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200 min-h-[120px]"
+                required
+              />
+            </FormField>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField label="Catégorie" htmlFor="category" required icon={<Tag className="h-4 w-4" />}>
+                <div className="relative">
+                  <select
+                    id="category"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200 appearance-none bg-white"
+                    required
+                    disabled={isLoadingCategories}
+                  >
+                    <option value="">Sélectionner une catégorie</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.nom}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                    {isLoadingCategories ? (
+                      <svg className="animate-spin h-5 w-5 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              </FormField>
+
+              <FormField label="État" htmlFor="condition" required icon={<AlertCircle className="h-4 w-4" />}>
+                <div className="relative">
+                  <select
+                    id="condition"
+                    value={condition}
+                    onChange={(e) => setCondition(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200 appearance-none bg-white"
+                    required
+                  >
+                    <option value="">Sélectionner l'état</option>
+                    {conditions.map((cond, index) => (
+                      <option key={index} value={cond}>
+                        {cond}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </FormField>
+            </div>
+          </motion.div>
+        )
+      case 2:
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6"
+          >
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
+                <Camera className="mr-2 h-5 w-5 text-orange-500" />
+                Photos du produit
+              </h2>
+              <p className="text-gray-500">
+                Les annonces avec photos sont 10x plus consultées. Ajoutez jusqu'à 5 photos.
+              </p>
+            </div>
+
+            <div className="relative p-0.5 rounded-xl shadow-sm">
+              <div className="group relative flex flex-col justify-center p-8 border border-gray-200 rounded-lg bg-white transition-all duration-200 hover:shadow-md">
+                <div className="text-center">
+                  <div className="relative mb-4">
+                    <div className="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center shadow-sm">
+                      <Upload className="h-8 w-8 text-orange-500 transition-transform group-hover:scale-110 duration-300" />
+                    </div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="h-14 w-14 bg-orange-500/10 rounded-full animate-ping"></div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <label htmlFor="file-upload" className="relative cursor-pointer">
+                      <div className="bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg px-6 py-3 inline-flex items-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md">
+                        <span>Ajouter des photos</span>
+                        <svg
+                          className="w-4 h-4 transition-transform duration-300 group-hover:rotate-12"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          />
+                        </svg>
+                      </div>
+                      <input
+                        id="file-upload"
+                        type="file"
+                        className="sr-only"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                      />
+                    </label>
+                  </div>
+
+                  <p className="mt-3 text-sm text-gray-500">PNG, JPG, GIF jusqu'à 10MB (max: 5 images)</p>
+                </div>
+              </div>
+            </div>
+
+            <ImagePreview images={images} onRemove={removeImage} />
+
+            {images.length === 0 && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-start mt-4 shadow-sm">
+                <Info className="h-5 w-5 text-orange-500 mr-3 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700">
+                  Les annonces avec photos ont 10 fois plus de chances d'être consultées. Ajoutez au moins une photo
+                  pour continuer.
+                </p>
+              </div>
+            )}
+          </motion.div>
+        )
+      case 3:
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-6"
+          >
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
+                <MapPin className="mr-2 h-5 w-5 text-orange-500" />
+                Localisation et prix
+              </h2>
+              <p className="text-gray-500">Précisez où se trouve votre article et fixez son prix.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField label="Prix" htmlFor="price" required icon={<Euro className="h-4 w-4" />}>
+                <input
+                  type="number"
+                  id="price"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200"
+                  step="0.01"
+                  min="0"
+                  required
+                />
+              </FormField>
+
+              <FormField label="Localisation" htmlFor="location" required icon={<MapPin className="h-4 w-4" />}>
+                <input
+                  type="text"
+                  id="location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Ville, Code postal"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200"
+                  required
+                />
+              </FormField>
+            </div>
+
+            <FormField label="Contact" htmlFor="contactInfo" required icon={<Phone className="h-4 w-4" />}>
+              <input
+                type="text"
+                id="contactInfo"
+                value={contactInfo}
+                onChange={(e) => setContactInfo(e.target.value)}
+                placeholder="Téléphone ou email"
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200"
+                required
+              />
+            </FormField>
+
+            <div className="bg-white rounded-lg p-4 mt-4 border border-gray-200 shadow-sm">
+              <h3 className="font-medium text-gray-800 mb-3 flex items-center">
+                <Info className="h-4 w-4 mr-2 text-orange-500" />
+                Aperçu de l'annonce
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-sm text-gray-500">Titre</div>
+                  <div className="font-medium">{title || "Non spécifié"}</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-sm text-gray-500">Catégorie</div>
+                  <div className="font-medium">{category || "Non spécifiée"}</div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <div className="text-sm text-gray-500">Prix</div>
+                  <div className="font-medium">{price ? `${price} €` : "Non spécifié"}</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )
+      default:
+        return null
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50/80 via-white to-orange-50/50">
-      {/* <NavBar /> */}
-      
+    <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8 animate-fade-in">
-            <div className="inline-block relative mb-3">
-              <div className="absolute inset-0 bg-orange-200 rounded-full blur-2xl opacity-20"></div>
-              <h1 className="relative text-4xl md:text-5xl font-bold text-gray-800 mb-2 bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-orange-400">
-                Add New Product
-              </h1>
-            </div>
-            <p className="text-gray-500 max-w-2xl mx-auto animate-fade-in opacity-0" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
-              Fill out the details below to list your product on GlowMarket. 
-              Quality listings sell faster!
+          <div className="text-center mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Déposer une annonce</h1>
+            <p className="text-gray-500 max-w-2xl mx-auto">
+              Vendez facilement vos objets inutilisés et trouvez des trésors près de chez vous avec LocalExchange.
             </p>
           </div>
 
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-orange-300 rounded-2xl blur opacity-10 animate-pulse-light"></div>
-            <div className="relative bg-white rounded-xl shadow-card p-6 md:p-8 lg:p-10 overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-orange-50 rounded-full -translate-y-1/2 translate-x-1/2 opacity-20 blur-3xl"></div>
-              
-              <div className="mb-6 border-b border-orange-100 pb-4">
-                <div className="flex justify-center space-x-6">
-                  <button 
-                    onClick={() => handleSectionChange('details')} 
-                    className={`py-2 px-4 relative font-medium transition-all duration-300 ${activeSection === 'details' ? 'text-orange-500' : 'text-gray-500 hover:text-orange-400'}`}
+          <ProgressIndicator currentStep={currentStep} totalSteps={totalSteps} />
+
+          <div className="mt-8">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+              <form onSubmit={handleSubmit} className="p-6 md:p-8">
+                <AnimatePresence mode="wait">{renderStepContent()}</AnimatePresence>
+
+                <div className="flex justify-between pt-6 border-t border-gray-100 mt-8">
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    disabled={currentStep === 1}
+                    className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
+                      currentStep === 1
+                        ? "text-gray-300 cursor-not-allowed"
+                        : "text-gray-600 hover:text-orange-500 hover:bg-gray-50"
+                    }`}
                   >
-                    Product Details
-                    {activeSection === 'details' && (
-                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 animate-scale-in"></span>
-                    )}
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Précédent
                   </button>
-                  <button 
-                    onClick={() => handleSectionChange('photos')} 
-                    className={`py-2 px-4 relative font-medium transition-all duration-300 ${activeSection === 'photos' ? 'text-orange-500' : 'text-gray-500 hover:text-orange-400'}`}
-                  >
-                    Photos
-                    {activeSection === 'photos' && (
-                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 animate-scale-in"></span>
-                    )}
-                  </button>
-                  <button 
-                    onClick={() => handleSectionChange('contact')} 
-                    className={`py-2 px-4 relative font-medium transition-all duration-300 ${activeSection === 'contact' ? 'text-orange-500' : 'text-gray-500 hover:text-orange-400'}`}
-                  >
-                    Location & Contact
-                    {activeSection === 'contact' && (
-                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 animate-scale-in"></span>
-                    )}
-                  </button>
-                </div>
-              </div>
-              
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className={`transition-all duration-500 ${activeSection === 'details' ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-                  <div className="space-y-6">
-                    <FormField label="Title" htmlFor="title" required>
-                      <input
-                        type="text"
-                        id="title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="What are you selling?"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 input-focus transition-all duration-300 focus:scale-[1.01]"
-                        required
-                      />
-                    </FormField>
 
-                    <FormField label="Description" htmlFor="description" required>
-                      <textarea
-                        id="description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Describe your item (condition, features, etc.)"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 min-h-[120px] input-focus transition-all duration-300 focus:scale-[1.01]"
-                        required
-                      />
-                    </FormField>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField label="Price" htmlFor="price" required>
-                        <div className="relative group">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-orange-500 transition-colors duration-200">$</span>
-                          <input
-                            type="number"
-                            id="price"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
-                            placeholder="0.00"
-                            className="w-full pl-8 pr-4 py-3 rounded-lg border border-gray-200 input-focus transition-all duration-300 focus:scale-[1.01]"
-                            step="0.01"
-                            min="0"
-                            required
-                          />
-                        </div>
-                      </FormField>
-
-                      <FormField label="Category" htmlFor="category" required>
-                        <select
-                          id="category"
-                          value={category}
-                          onChange={(e) => setCategory(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white input-focus transition-all duration-300 appearance-none focus:scale-[1.01]"
-                          required
-                        >
-                          <option value="">Select a category</option>
-                          {categories.map((cat, index) => (
-                            <option key={index} value={cat}>{cat}</option>
-                          ))}
-                        </select>
-                        <div className="absolute right-3 top-[55%] pointer-events-none text-gray-500">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </FormField>
-                    </div>
-                    
-                    <div className="flex justify-end mt-4">
-                      <button 
-                        type="button" 
-                        className="flex items-center text-orange-500 hover:text-orange-600 font-medium transition-all duration-300"
-                        onClick={() => handleSectionChange('photos')}
-                      >
-                        Next: Add Photos
-                        <svg className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className={`transition-all duration-500 ${activeSection === 'photos' ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-                  <div className="group relative flex justify-center p-8 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50/50 transition-all duration-300 hover:bg-gray-50/80 hover:border-orange-200">
-                    <div className="text-center">
-                      <div className="relative">
-                        <Upload className="mx-auto h-12 w-12 text-gray-400 transition-transform group-hover:scale-110 duration-300" />
-                        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <div className="h-10 w-10 bg-orange-500/10 rounded-full animate-ping"></div>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-4">
-                        <label htmlFor="file-upload" className="relative inline-flex overflow-hidden group/btn cursor-pointer">
-                          <span className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-400 rounded-lg transition-all duration-300 group-hover/btn:scale-[1.02]"></span>
-                          <span className="relative px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-400 text-white font-medium rounded-lg flex items-center gap-2">
-                            Upload Images
-                            <svg className="w-4 h-4 transition-transform duration-300 group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                          </span>
-                          <input 
-                            id="file-upload" 
-                            type="file" 
-                            className="sr-only" 
-                            multiple 
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                          />
-                        </label>
-                      </div>
-                      
-                      <p className="mt-3 text-sm text-gray-500 transition-all duration-300 group-hover:text-gray-600">
-                        PNG, JPG, GIF up to 10MB (max: 5 images)
-                      </p>
-                    </div>
-                  </div>
-
-                  <ImagePreview images={images} onRemove={removeImage} />
-                  
-                  <div className="flex justify-between mt-6">
-                    <button 
-                      type="button" 
-                      className="flex items-center text-gray-500 hover:text-orange-500 font-medium transition-all duration-300"
-                      onClick={() => handleSectionChange('details')}
+                  {currentStep < totalSteps ? (
+                    <button
+                      type="button"
+                      onClick={nextStep}
+                      disabled={!isStepComplete(currentStep)}
+                      className={`flex items-center px-6 py-2 rounded-lg transition-all duration-200 ${
+                        isStepComplete(currentStep)
+                          ? "bg-orange-500 hover:bg-orange-600 text-white shadow-sm hover:shadow-md"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
                     >
-                      <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                      Back to Details
+                      Suivant
+                      <ArrowRight className="h-4 w-4 ml-2" />
                     </button>
-                    
-                    <button 
-                      type="button" 
-                      className="flex items-center text-orange-500 hover:text-orange-600 font-medium transition-all duration-300"
-                      onClick={() => handleSectionChange('contact')}
-                    >
-                      Next: Location & Contact
-                      <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                
-                <div className={`transition-all duration-500 ${activeSection === 'contact' ? 'opacity-100 max-h-[2000px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-                  <div className="space-y-6">
-                    <FormField label="Location" htmlFor="location" required>
-                      <input
-                        type="text"
-                        id="location"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        placeholder="City, State or Zip"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 input-focus transition-all duration-300 focus:scale-[1.01]"
-                        required
-                      />
-                    </FormField>
-
-                    <FormField label="Contact Information" htmlFor="contactInfo" required>
-                      <input
-                        type="text"
-                        id="contactInfo"
-                        value={contactInfo}
-                        onChange={(e) => setContactInfo(e.target.value)}
-                        placeholder="Phone number or email"
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 input-focus transition-all duration-300 focus:scale-[1.01]"
-                        required
-                      />
-                    </FormField>
-                    
-                    <div className="flex justify-start mt-4">
-                      <button 
-                        type="button" 
-                        className="flex items-center text-gray-500 hover:text-orange-500 font-medium transition-all duration-300"
-                        onClick={() => handleSectionChange('photos')}
-                      >
-                        <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                        Back to Photos
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-8 text-center">
+                  ) : (
                     <button
                       type="submit"
-                      disabled={isSubmitting}
-                      className="relative group overflow-hidden px-10 py-4 rounded-xl text-lg font-medium shadow-md hover:shadow-glow transition-all duration-500 min-w-[220px]"
+                      disabled={isSubmitting || !isStepComplete(currentStep)}
+                      className={`flex items-center px-6 py-2 rounded-lg transition-all duration-200 ${
+                        isSubmitting || !isStepComplete(currentStep)
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-orange-500 hover:bg-orange-600 text-white shadow-sm hover:shadow-md"
+                      }`}
                     >
-                      <span className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-400 group-hover:scale-[1.02] transition-transform duration-500"></span>
-                      <span className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100"></span>
-                      <span className="relative flex items-center justify-center text-white">
-                        {isSubmitting ? (
-                          <>
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <Check className="mr-2 h-5 w-5 transition-transform group-hover:rotate-12 duration-300" />
-                            List Your Item
-                          </>
-                        )}
-                      </span>
+                      {isSubmitting ? (
+                        <>
+                          <svg
+                            className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          Traitement...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="mr-2 h-4 w-4" />
+                          Publier l'annonce
+                        </>
+                      )}
                     </button>
-                    
-                    <p className="mt-4 text-sm text-gray-500">
-                      By submitting this listing, you agree to our 
-                      <a href="#" className="text-orange-500 hover:text-orange-600 transition-colors duration-200 ml-1">Terms of Service</a> and 
-                      <a href="#" className="text-orange-500 hover:text-orange-600 transition-colors duration-200 ml-1">Privacy Policy</a>
-                    </p>
-                  </div>
+                  )}
                 </div>
               </form>
+            </div>
+
+            <div className="text-center mt-6 text-sm text-gray-500">
+              En publiant cette annonce, vous acceptez nos
+              <a href="#" className="text-orange-500 hover:text-orange-600 transition-colors duration-200 ml-1">
+                Conditions d'utilisation
+              </a>{" "}
+              et
+              <a href="#" className="text-orange-500 hover:text-orange-600 transition-colors duration-200 ml-1">
+                Politique de confidentialité
+              </a>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
-};
-
-export default AddProduct;
+  )
+}

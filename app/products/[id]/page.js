@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import NavBar from "../../Components/NavBar"
@@ -16,11 +16,32 @@ import {
   ChevronLeft,
   ChevronRightIcon,
 } from "lucide-react"
+import axios from "axios"
 
-export default function ProductDetails() {
+export default function ProductDetails(props) {
+  const id = props?.params?.id
   const router = useRouter()
   const [activeImage, setActiveImage] = useState(0)
   const [showAllSpecs, setShowAllSpecs] = useState(false)
+  const [pr, setPr] = useState(null)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchpr = async () => {
+      try {
+        setIsLoading(true)
+        const response = await axios.get(`http://127.0.0.1:8000/api/product/${id}`)
+        const data = response.data
+        setPr(data.data)
+      } catch (error) {
+        console.error("Error fetching product:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchpr()
+  }, [id])
 
   // Sample product data
   const product = {
@@ -95,6 +116,14 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
     setActiveImage((prev) => (prev - 1 + product.images.length) % product.images.length)
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <NavBar />
@@ -104,13 +133,13 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
         <nav className="flex" aria-label="Breadcrumb">
           <ol className="flex items-center space-x-2 text-sm text-gray-500">
             <li>
-              <button onClick={() => router.push("/")} className="hover:text-orange-500">
+              <button onClick={() => router.push("/")} className="hover:text-orange-500 transition-colors">
                 Accueil
               </button>
             </li>
             <li className="flex items-center">
               <ChevronRight className="h-4 w-4 flex-shrink-0 text-gray-400" />
-              <button onClick={() => router.push("/product-example")} className="ml-2 hover:text-orange-500">
+              <button onClick={() => router.push("/product-example")} className="ml-2 hover:text-orange-500 transition-colors">
                 {product.category}
               </button>
             </li>
@@ -128,7 +157,7 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
       <div className="md:hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
         <button
           onClick={() => router.push("/product-example")}
-          className="flex items-center text-gray-600 hover:text-orange-500"
+          className="flex items-center text-gray-600 hover:text-orange-500 transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           <span className="text-sm">Retour aux résultats</span>
@@ -136,7 +165,7 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="md:flex">
             {/* Product Images */}
             <div className="md:w-3/5 relative">
@@ -147,38 +176,41 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
                   alt={product.title}
                   fill
                   className="object-cover"
+                  priority
                 />
 
                 {/* Image navigation buttons */}
                 <button
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all hover:scale-110"
                   aria-label="Image précédente"
                 >
                   <ChevronLeft className="h-5 w-5 text-gray-700" />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-md"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all hover:scale-110"
                   aria-label="Image suivante"
                 >
                   <ChevronRightIcon className="h-5 w-5 text-gray-700" />
                 </button>
 
                 {/* Image counter */}
-                <div className="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-2 py-1 rounded-md">
+                <div className="absolute bottom-4 right-4 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm">
                   {activeImage + 1} / {product.images.length}
                 </div>
               </div>
 
               {/* Thumbnails */}
-              <div className="flex p-2 gap-2 overflow-x-auto scrollbar-hide">
+              <div className="flex p-4 gap-3 overflow-x-auto scrollbar-hide">
                 {product.images.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setActiveImage(index)}
-                    className={`relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all ${
-                      activeImage === index ? "border-orange-500" : "border-transparent hover:border-gray-300"
+                    className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
+                      activeImage === index 
+                        ? "border-orange-500 ring-2 ring-orange-200" 
+                        : "border-transparent hover:border-gray-300"
                     }`}
                   >
                     <Image
@@ -196,59 +228,71 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
             <div className="md:w-2/5 p-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-800">{product.title}</h1>
-                  <div className="mt-2 flex items-center">
-                    <span className="text-2xl font-bold text-orange-600">{product.price.toFixed(2)} €</span>
+                  <h1 className="text-2xl font-bold text-gray-800 leading-tight">{product.title}</h1>
+                  <div className="mt-3 flex items-center">
+                    <span className="text-3xl font-bold text-orange-600">{product.price.toFixed(2)} €</span>
                     {product.originalPrice && (
                       <>
-                        <span className="ml-2 text-sm text-gray-500 line-through">
+                        <span className="ml-3 text-lg text-gray-500 line-through">
                           {product.originalPrice.toFixed(2)} €
                         </span>
-                        <span className="ml-2 text-xs font-medium bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded">
+                        <span className="ml-3 text-sm font-medium bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
                           -{product.discount}%
                         </span>
                       </>
                     )}
                   </div>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex space-x-3">
                   <button
-                    className="p-2 rounded-full border border-gray-200 hover:bg-gray-50"
+                    onClick={() => setIsFavorite(!isFavorite)}
+                    className={`p-2.5 rounded-full border transition-colors ${
+                      isFavorite 
+                        ? "border-red-200 bg-red-50 text-red-500" 
+                        : "border-gray-200 hover:bg-gray-50 text-gray-500"
+                    }`}
                     aria-label="Ajouter aux favoris"
                   >
-                    <Heart className="h-5 w-5 text-gray-500" />
+                    <Heart className={`h-5 w-5 ${isFavorite ? "fill-current" : ""}`} />
                   </button>
-                  <button className="p-2 rounded-full border border-gray-200 hover:bg-gray-50" aria-label="Partager">
-                    <Share2 className="h-5 w-5 text-gray-500" />
+                  <button 
+                    className="p-2.5 rounded-full border border-gray-200 hover:bg-gray-50 text-gray-500" 
+                    aria-label="Partager"
+                  >
+                    <Share2 className="h-5 w-5" />
                   </button>
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center text-sm text-gray-500">
-                <MapPin className="h-4 w-4 mr-1 text-gray-400" />
-                <span>{product.location}</span>
-                <span className="mx-2">•</span>
-                <Clock className="h-4 w-4 mr-1 text-gray-400" />
-                <span>{product.postedDate}</span>
-                <span className="mx-2">•</span>
-                <span>{product.views} vues</span>
+              <div className="mt-4 flex items-center text-sm text-gray-500 space-x-4">
+                <div className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-1.5 text-gray-400" />
+                  <span>{product.location}</span>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 mr-1.5 text-gray-400" />
+                  <span>{product.postedDate}</span>
+                </div>
+                <div className="flex items-center">
+                  <span>{product.views} vues</span>
+                </div>
               </div>
 
-              <div className="mt-6">
-                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+              <div className="mt-6 space-y-3">
+                <div className="flex items-center justify-between py-2.5 px-4 bg-gray-50 rounded-lg">
                   <span className="text-sm text-gray-500">État</span>
                   <span className="text-sm font-medium">{product.condition}</span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                <div className="flex items-center justify-between py-2.5 px-4 bg-gray-50 rounded-lg">
                   <span className="text-sm text-gray-500">Catégorie</span>
                   <span className="text-sm font-medium">{product.category}</span>
                 </div>
               </div>
 
               {/* Seller Info */}
-              <div className="mt-6 bg-gray-50 rounded-lg p-4">
+              <div className="mt-6 bg-gray-50 rounded-xl p-5">
                 <div className="flex items-center">
-                  <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                  <div className="relative w-14 h-14 rounded-full overflow-hidden ring-2 ring-white shadow-md">
                     <Image
                       src={product.seller.avatar || "/placeholder.svg"}
                       alt={product.seller.name}
@@ -256,26 +300,25 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
                       className="object-cover"
                     />
                     {product.seller.verified && (
-                      <div className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-0.5">
+                      <div className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-1">
                         <Shield className="h-3 w-3 text-white" />
                       </div>
                     )}
                   </div>
-                  <div className="ml-3">
+                  <div className="ml-4">
                     <h3 className="text-sm font-medium text-gray-900">{product.seller.name}</h3>
-                    <div className="flex items-center mt-1">
-                      <div className="flex items-center">
-                        <Star className="h-3 w-3 text-yellow-400" />
-                        <span className="text-xs ml-1">{product.seller.rating}</span>
+                    <div className="flex items-center mt-1 space-x-2">
+                      <div className="flex items-center bg-yellow-50 px-2 py-0.5 rounded-full">
+                        <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                        <span className="text-xs ml-1 font-medium">{product.seller.rating}</span>
                       </div>
-                      <span className="mx-1 text-gray-300">•</span>
                       <span className="text-xs text-gray-500">Membre depuis {product.seller.memberSince}</span>
                     </div>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                    <MessageCircle className="h-5 w-5 inline mr-2 -mt-1" />
+                  <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3.5 px-4 rounded-xl font-medium transition-colors flex items-center justify-center">
+                    <MessageCircle className="h-5 w-5 mr-2" />
                     Contacter le vendeur
                   </button>
                 </div>
@@ -289,9 +332,9 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
               {/* Description */}
               <div className="md:w-3/5">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Description</h2>
-                <div className="prose max-w-none text-gray-600">
+                <div className="prose max-w-none text-gray-600 space-y-4">
                   {product.description.split("\n\n").map((paragraph, index) => (
-                    <p key={index} className="mb-4">
+                    <p key={index} className="leading-relaxed">
                       {paragraph}
                     </p>
                   ))}
@@ -301,10 +344,10 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
               {/* Specifications */}
               <div className="mt-8 md:mt-0 md:w-2/5">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Caractéristiques</h2>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <dl className="space-y-3">
+                <div className="bg-gray-50 rounded-xl p-5">
+                  <dl className="space-y-4">
                     {product.specifications.slice(0, showAllSpecs ? undefined : 4).map((spec, index) => (
-                      <div key={index} className="flex justify-between">
+                      <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
                         <dt className="text-sm text-gray-500">{spec.name}</dt>
                         <dd className="text-sm font-medium text-gray-900">{spec.value}</dd>
                       </div>
@@ -313,9 +356,10 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
                   {product.specifications.length > 4 && (
                     <button
                       onClick={() => setShowAllSpecs(!showAllSpecs)}
-                      className="mt-4 text-sm text-orange-500 hover:text-orange-600 font-medium"
+                      className="mt-4 text-sm text-orange-500 hover:text-orange-600 font-medium flex items-center"
                     >
                       {showAllSpecs ? "Voir moins" : "Voir toutes les caractéristiques"}
+                      <ChevronRight className={`h-4 w-4 ml-1 transition-transform ${showAllSpecs ? "rotate-90" : ""}`} />
                     </button>
                   )}
                 </div>
@@ -330,7 +374,7 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
               {product.relatedProducts.map((relatedProduct) => (
                 <div
                   key={relatedProduct.id}
-                  className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                  className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all"
                 >
                   <div className="relative h-48">
                     <Image
@@ -360,7 +404,7 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
             <Shield className="h-5 w-5 mr-2" />
             Conseils de sécurité
           </h2>
-          <ul className="space-y-2 text-sm text-orange-700">
+          <ul className="space-y-3 text-sm text-orange-700">
             <li className="flex items-start">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-orange-500 mt-1.5 mr-2"></span>
               Rencontrez le vendeur dans un lieu public sécurisé

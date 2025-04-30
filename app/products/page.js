@@ -21,20 +21,22 @@ export default function ProductExample() {
         }
         const data = await response.json();
         // Transform API data to match our component's expected format
-        const transformedProducts = data.data.map(product => ({
+        const transformedProducts = data.data.map(product => ( { 
+          
           id: product.id.toString(),
           title: product.nom,
           description: product.description,
           price: product.prix,
           location: product.localisation,
-          imageUrl: "/categories/h.jpg", // Default image since API doesn't provide one
+          imageUrl:  product.image && product.image[0] && product.image[0].url ? product.image[0].url : "/categories/h.jpg", // Default image since API doesn't provide one
           category: product.categorie,
           timePosted: formatTimePosted(product.dateDepot),
           sellerName: product.vendeur,
           sellerAvatar: "/images/man.png", // Default avatar since API doesn't provide one
           isNew: isNewProduct(product.dateDepot),
           isFeatured: false, // Default value since API doesn't provide this
-        }));
+        })); 
+        console.log(data.data[7].image[0].url)
         setAllProducts(transformedProducts);
       } catch (err) {
         setError(err.message);
