@@ -221,7 +221,7 @@ export default function AboutPage() {
               className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl"
             >
               <Image
-                src="https://images.unsplash.com/photo-1556911220-bff31c812dba"
+                src="https://images.unsplash.com/photo-1607083206968-13611e3d76db"
                 alt="Local community market"
                 fill
                 className="object-cover"
