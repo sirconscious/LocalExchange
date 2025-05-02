@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef,useEffect } from "react"
 import { motion } from "framer-motion"
 import {
     User,
@@ -14,8 +14,9 @@ import {
 import { toast } from "sonner";
 import FormField from "../../Components/form-field";
 import NavBarv2 from "../../Components/NavbarSecond";
-
-// Sample product data
+import ClientAxios from "../../server/AxiosClient";
+import Cookies from "js-cookie"
+// Sample product user
 const userProducts = [
     {
         id: 1,
@@ -76,13 +77,10 @@ const userProducts = [
 
 export default function ProfilePage() {
     // User information state
-    const [name, setName] = useState("Thomas Dupont")
-    const [email, setEmail] = useState("thomas.dupont@example.com")
-    const [phone, setPhone] = useState("06 12 34 56 78")
-    const [location, setLocation] = useState("Lyon, 69003")
-    const [bio, setBio] = useState(
-        "Passionné de technologie et de sport. J'aime trouver de bonnes affaires et donner une seconde vie aux objets.",
-    )
+    const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
+    const [phone, setPhone] = useState("")
+    const [city, setCity] = useState("")
     const [profileImage, setProfileImage] = useState(null)
 
     // Password state
@@ -123,26 +121,59 @@ export default function ProfilePage() {
 
     // Products to display (limited or all)
     const displayedProducts = showAllProducts ? filteredProducts : filteredProducts.slice(0, 3)
-
+    // call api for user
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const token = Cookies.get("access_token"); // Get the token from cookies
+                if (token) {
+                    ClientAxios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+                }
+                const response = await ClientAxios.get("/api/user");
+                const User = response.data.user; // Access the actual data from the response
+                console.log('user', User);
+                setName(User.name || "");
+                setEmail(User.email || "");
+                setPhone(User.phone || "");
+                setCity(User.city || "Lyon, 69003");
+                if (User.profileImage) {
+                    setProfileImage(User.profileImage);
+                }
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+    
+        fetchUser(); // Invoke the async function
+    }, []);
     // Scroll to product history section
     const scrollToProductHistory = () => {
         productHistoryRef.current?.scrollIntoView({ behavior: "smooth" })
     }
 
     // Handle profile image upload
-    const handleImageUpload = (e) => {
+    const handleImageUpload = async (e) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0]
-            const reader = new FileReader()
+            const formData = new FormData()
+            formData.append('image', file)
 
-            reader.onload = (e) => {
-                if (e.target?.result) {
-                    setProfileImage(e.target.result)
-                    toast.success("Photo de profil mise à jour")
+            try {
+                const token = Cookies.get("access_token")
+                if (token) {
+                    ClientAxios.defaults.headers.common["Authorization"] = `Bearer ${token}`
                 }
+                const response = await ClientAxios.post("/api/user/update-image", formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
+                setProfileImage(response.data.image_url)
+                toast.success("Photo de profil mise à jour")
+            } catch (error) {
+                console.error("Error uploading image:", error)
+                toast.error("Erreur lors de la mise à jour de la photo de profil")
             }
-
-            reader.readAsDataURL(file)
         }
     }
 
@@ -152,20 +183,31 @@ export default function ProfilePage() {
     }
 
     // Save profile information
-    const saveProfileInfo = () => {
+    const saveProfileInfo = async () => {
         setIsSaving(true)
-
-        // Simulate API call
-        setTimeout(() => {
-            setIsSaving(false)
+        try {
+            const token = Cookies.get("access_token")
+            if (token) {
+                ClientAxios.defaults.headers.common["Authorization"] = `Bearer ${token}`
+            }
+            const response = await ClientAxios.put("/api/user/update", {
+                name,
+                email,
+                phone,
+                city
+            })
             setIsEditingProfile(false)
             toast.success("Profil mis à jour avec succès")
-        }, 1000)
+        } catch (error) {
+            console.error("Error updating profile:", error)
+            toast.error("Erreur lors de la mise à jour du profil")
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     // Change password
-    const changePassword = () => {
-        // Validate passwords
+    const changePassword = async () => {
         if (newPassword !== confirmPassword) {
             toast.error("Les mots de passe ne correspondent pas")
             return
@@ -177,16 +219,31 @@ export default function ProfilePage() {
         }
 
         setIsSaving(true)
-
-        // Simulate API call
-        setTimeout(() => {
-            setIsSaving(false)
+        try {
+            const token = Cookies.get("access_token")
+            if (token) {
+                ClientAxios.defaults.headers.common["Authorization"] = `Bearer ${token}`
+            }
+            await ClientAxios.put("/api/user/update-password", {
+                current_password: currentPassword,
+                password: newPassword,
+                password_confirmation: confirmPassword
+            })
             setIsChangingPassword(false)
             setCurrentPassword("")
             setNewPassword("")
             setConfirmPassword("")
             toast.success("Mot de passe modifié avec succès")
-        }, 1000)
+        } catch (error) {
+            console.error("Error changing password:", error)
+            if (error.response?.data?.message) {
+                toast.error(error.response.data.message)
+            } else {
+                toast.error("Erreur lors de la modification du mot de passe")
+            }
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     // Save notification preferences
@@ -198,6 +255,25 @@ export default function ProfilePage() {
             setIsSaving(false)
             toast.success("Préférences de notification mises à jour")
         }, 1000)
+    }
+
+    // Delete account
+    const deleteAccount = async () => {
+        if (window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")) {
+            try {
+                const token = Cookies.get("access_token")
+                if (token) {
+                    ClientAxios.defaults.headers.common["Authorization"] = `Bearer ${token}`
+                }
+                await ClientAxios.delete("/api/user/delete")
+                Cookies.remove("access_token")
+                window.location.href = "/"
+                toast.success("Compte supprimé avec succès")
+            } catch (error) {
+                console.error("Error deleting account:", error)
+                toast.error("Erreur lors de la suppression du compte")
+            }
+        }
     }
 
     return (
@@ -242,7 +318,7 @@ export default function ProfilePage() {
                                     </div>
 
                                     <h2 className="text-xl font-bold text-gray-800">{name}</h2>
-                                    <p className="text-gray-500 text-sm mt-1">{location}</p>
+                                    <p className="text-gray-500 text-sm mt-1">{city}</p>
 
                                     <div className="mt-4 flex justify-center space-x-4 text-sm">
                                         <div className="text-center">
@@ -367,26 +443,16 @@ export default function ProfilePage() {
                                                     />
                                                 </FormField>
 
-                                                <FormField label="Localisation" htmlFor="location" icon={<MapPin className="h-4 w-4" />}>
+                                                <FormField label="Localisation" htmlFor="city" icon={<MapPin className="h-4 w-4" />}>
                                                     <input
                                                         type="text"
-                                                        id="location"
-                                                        value={location}
-                                                        onChange={(e) => setLocation(e.target.value)}
+                                                        id="city"
+                                                        value={city}
+                                                        onChange={(e) => setCity(e.target.value)}
                                                         className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200"
                                                     />
                                                 </FormField>
                                             </div>
-
-                                            <FormField label="Bio" htmlFor="bio" icon={<User className="h-4 w-4" />}>
-                                                <textarea
-                                                    id="bio"
-                                                    value={bio}
-                                                    onChange={(e) => setBio(e.target.value)}
-                                                    rows={3}
-                                                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200"
-                                                />
-                                            </FormField>
 
                                             <div className="flex justify-end mt-2">
                                                 <button
@@ -455,18 +521,15 @@ export default function ProfilePage() {
                                                 </div>
 
                                                 <div>
-                                                    <div className="text-sm text-gray-500">Localisation</div>
+                                                    <div className="text-sm text-gray-500">City</div>
                                                     <div className="font-medium text-gray-800 flex items-center mt-1">
                                                         <MapPin className="h-4 w-4 text-orange-500 mr-2" />
-                                                        {location}
+                                                        {city}
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div>
-                                                <div className="text-sm text-gray-500">Bio</div>
-                                                <div className="text-gray-800 mt-1 bg-gray-50 p-3 rounded-lg">{bio}</div>
-                                            </div>
+                                           
                                         </motion.div>
                                     )}
                                 </div>
@@ -993,7 +1056,10 @@ export default function ProfilePage() {
                                                     La suppression de votre compte est définitive et irréversible. Toutes vos données, y compris
                                                     vos annonces, messages et évaluations, seront supprimées.
                                                 </p>
-                                                <button className="mt-3 px-4 py-2 bg-white border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors duration-200 text-sm font-medium">
+                                                <button 
+                                                    onClick={deleteAccount}
+                                                    className="mt-3 px-4 py-2 bg-white border border-red-500 text-red-500 rounded-lg hover:bg-red-50 transition-colors duration-200 text-sm font-medium"
+                                                >
                                                     Supprimer mon compte
                                                 </button>
                                             </div>
