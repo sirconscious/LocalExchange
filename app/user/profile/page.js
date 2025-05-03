@@ -136,8 +136,8 @@ export default function ProfilePage() {
                 setEmail(User.email || "");
                 setPhone(User.phone || "");
                 setCity(User.city || "Lyon, 69003");
-                if (User.profileImage) {
-                    setProfileImage(User.profileImage);
+                if (User.image) {
+                    setProfileImage(User.image);
                 }
             } catch (error) {
                 console.error("Error fetching user:", error);
