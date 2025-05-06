@@ -126,7 +126,7 @@ export default function AddProduct() {
       formData.append('prix', price)
       formData.append('localisation', location)
       formData.append('categorie_id', category)
-      formData.append('condition', condition)
+      formData.append('etat', condition)
       formData.append('contactInfo', contactInfo)
 
       // Append all images
@@ -284,7 +284,8 @@ export default function AddProduct() {
                 <div className="relative">
                   <select
                     id="condition"
-                    value={condition}
+                    value={condition} 
+                    name="etat"
                     onChange={(e) => setCondition(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200 appearance-none bg-white"
                     required
