@@ -1,82 +1,45 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Package, Search, Filter, ChevronDown, Eye, Trash2 } from "lucide-react"
 import AdminLayout from "../../Components/admin-layout"
-
-// Sample data for products
-const productsData = [
-  {
-    id: 1,
-    title: "MacBook Pro 2021",
-    owner: "Thomas Dupont",
-    ownerId: 1,
-    category: "Électronique",
-    price: 1200,
-    status: "active",
-    date: "15/07/2023",
-    description: "MacBook Pro en excellent état, 16 pouces, 16GB RAM, 512GB SSD",
-    views: 124,
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 2,
-    title: "Canapé d'angle convertible",
-    owner: "Marie Laurent",
-    ownerId: 2,
-    category: "Ameublement",
-    price: 350,
-    status: "active",
-    date: "20/07/2023",
-    description: "Canapé d'angle convertible en tissu gris, très bon état",
-    views: 87,
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 3,
-    title: "Vélo de route Decathlon",
-    owner: "Jean Petit",
-    ownerId: 3,
-    category: "Sport",
-    price: 450,
-    status: "reported",
-    date: "10/07/2023",
-    description: "Vélo de route Decathlon taille M, peu utilisé",
-    views: 56,
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 4,
-    title: "iPhone 13 Pro Max",
-    owner: "Sophie Martin",
-    ownerId: 4,
-    category: "Électronique",
-    price: 850,
-    status: "sold",
-    date: "05/07/2023",
-    description: "iPhone 13 Pro Max 256GB, bleu pacifique, comme neuf",
-    views: 203,
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 5,
-    title: "Table à manger en bois",
-    owner: "Lucas Bernard",
-    ownerId: 5,
-    category: "Ameublement",
-    price: 180,
-    status: "active",
-    date: "01/07/2023",
-    description: "Table à manger en bois massif, 6 personnes",
-    views: 45,
-    image: "/placeholder.svg?height=80&width=80",
-  },
-]
+import ClientAxios from "../../server/AxiosClient"
 
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
+  const [productsData, setProducts] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await ClientAxios.get("/api/products")
+        const formattedProducts = response.data.data.map(product => ({
+          id: product.id,
+          title: product.nom,
+          owner: product.owner?.name || product.vendeur || "Unknown",
+          ownerId: product.vendeur_id,
+          category: product.categorie,
+          price: product.prix,
+          status: product.etat || "active", // Default to active if no status
+          date: new Date(product.dateDepot || product.created_at).toLocaleDateString(),
+          description: product.description,
+          views: 0, // Not in API response, defaulting to 0
+          image: product.image?.length > 0 ? product.image[0] : "/placeholder.svg",
+          localisation: product.localisation,
+          ownerDetails: product.owner
+        }))
+        setProducts(formattedProducts)
+      } catch (error) {
+        console.error("Error fetching products:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchProducts()
+  }, [])
 
   // Get unique categories from products
   const categories = ["all", ...new Set(productsData.map((product) => product.category))]
@@ -108,6 +71,18 @@ export default function ProductsPage() {
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClasses}`}>
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <AdminLayout>
+        <div className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+          </div>
+        </div>
+      </AdminLayout>
     )
   }
 
@@ -221,7 +196,9 @@ export default function ProductsPage() {
           </div>
 
           {filteredProducts.length === 0 && (
-            <div className="text-center py-12 text-gray-500">No products found matching your criteria</div>
+            <div className="text-center py-12 text-gray-500">
+              {productsData.length === 0 ? "No products available" : "No products found matching your criteria"}
+            </div>
           )}
         </div>
       </div>
