@@ -20,6 +20,7 @@ import { toast } from "sonner"
 import FormField from "../../Components/FormField"
 import ImagePreview from "../../components/ImagePreview"
 import ProgressIndicator from "../../components/progress-indicator"
+import CharacteristicsSection from "../../Components/CharacteristicsSection"
 import { useRouter } from "next/navigation"
 import Cookies from 'js-cookie'
 
@@ -34,6 +35,7 @@ export default function AddProduct() {
   const [location, setLocation] = useState("")
   const [contactInfo, setContactInfo] = useState("")
   const [images, setImages] = useState([])
+  const [characteristics, setCharacteristics] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
   const [categories, setCategories] = useState([])
@@ -128,6 +130,11 @@ export default function AddProduct() {
       formData.append('categorie_id', category)
       formData.append('etat', condition)
       formData.append('contactInfo', contactInfo)
+
+      // Append characteristics as JSON string
+      if (characteristics.length > 0) {
+        formData.append('caracteristiques', JSON.stringify(characteristics))
+      }
 
       // Append all images
       images.forEach((image, index) => {
@@ -230,7 +237,7 @@ export default function AddProduct() {
               />
             </FormField>
 
-            <FormField label="Description" htmlFor="description" required icon={<Info className="h-4 w-4" />}>
+            <FormField label="Description" htmlFor="description" required icon={<FileText className="h-4 w-4" />}>
               <textarea
                 id="description"
                 value={description}
@@ -241,43 +248,28 @@ export default function AddProduct() {
               />
             </FormField>
 
+            <CharacteristicsSection 
+              characteristics={characteristics}
+              onChange={setCharacteristics}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField label="Catégorie" htmlFor="category" required icon={<Tag className="h-4 w-4" />}>
-                <div className="relative">
-                  <select
-                    id="category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200 appearance-none bg-white"
-                    required
-                    disabled={isLoadingCategories}
-                  >
-                    <option value="">Sélectionner une catégorie</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.nom}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                    {isLoadingCategories ? (
-                      <svg className="animate-spin h-5 w-5 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    )}
-                  </div>
-                </div>
+                <select
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 shadow-sm focus:border-orange-400 focus:ring focus:ring-orange-100 transition-all duration-200 appearance-none bg-white"
+                  required
+                  disabled={isLoadingCategories}
+                >
+                  <option value="">Sélectionner une catégorie</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.nom}
+                    </option>
+                  ))}
+                </select>
               </FormField>
 
               <FormField label="État" htmlFor="condition" required icon={<AlertCircle className="h-4 w-4" />}>
