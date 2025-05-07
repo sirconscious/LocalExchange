@@ -1,13 +1,18 @@
 "use client"
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X, Search, User, Heart, Bell } from "lucide-react"
+import { Menu, X, Search, User, Heart, Bell, LogOut, UserCircle } from "lucide-react"
+import { useRouter } from "next/navigation"
+import Cookies from 'js-cookie'
 
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [searchFocused, setSearchFocused] = useState(false)
-
+  const [user, setUser] = useState(null)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const router = useRouter()
+ const [profileI , setProfileI] = useState(null)
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -20,6 +25,39 @@ export default function NavBar() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = Cookies.get('access_token')
+        if (!token) return
+
+        const response = await fetch('http://127.0.0.1:8000/api/user', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        })
+
+        if (response.ok) {
+          const data = await response.json()  
+          setProfileI(data.Profile_image)
+          console.log("test" , data)
+          setUser(data.user)
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error)
+      }
+    }
+
+    fetchUser()
+  }, [])
+
+  const handleLogout = () => {
+    Cookies.remove('access_token')
+    setUser(null)
+    router.push('/login')
+  }
 
   return (
     <nav
@@ -94,9 +132,52 @@ export default function NavBar() {
             <button className="text-gray-600 hover:text-orange-500 transition-colors duration-200 hover:scale-110">
               <Bell className="h-6 w-6" />
             </button>
-            <Link href="/login" className="text-gray-600 hover:text-orange-500 transition-colors duration-200 hover:scale-110">
-              <User className="h-6 w-6" />
-            </Link>
+            {user ? (
+              <div className="relative">
+                <button 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 text-gray-600 hover:text-orange-500 transition-colors duration-200"
+                >
+                  {user.image ? (
+                    <img 
+                      src={profileI} 
+                      alt={user.name} 
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-6 w-6" />
+                  )}
+                </button>
+                
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                    <Link
+                      href="/user/profile"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-500"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <UserCircle className="h-4 w-4 mr-2" />
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-500"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/login" className="text-gray-600 hover:text-orange-500 transition-colors duration-200 hover:scale-110">
+                <User className="h-6 w-6" />
+              </Link>
+            )}
             <Link
               href="/products/add"
               className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105"
@@ -172,16 +253,59 @@ export default function NavBar() {
               <button className="p-2 rounded-full text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-colors duration-200">
                 <Bell className="h-6 w-6" />
               </button>
-              <Link
-                href="/login"
-                className="p-2 rounded-full text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-colors duration-200"
-              >
-                <User className="h-6 w-6" />
-              </Link>
+              {user ? (
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="p-2 rounded-full text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-colors duration-200"
+                  >
+                    {user.image ? (
+                      <img 
+                        src={profileI} 
+                        alt={user.name} 
+                        className="h-6 w-6 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-6 w-6" />
+                    )}
+                  </button>
+                  
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                      <Link
+                        href="/user/profile"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-500"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <UserCircle className="h-4 w-4 mr-2" />
+                        Profile
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-500"
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="p-2 rounded-full text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-colors duration-200"
+                >
+                  <User className="h-6 w-6" />
+                </Link>
+              )}
             </div>
             <div className="mt-4">
               <Link
-                href="/login"
+                href="/products/add"
                 className="block text-center bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-lg font-medium hover:shadow-md transition-all duration-300"
               >
                 Déposer une annonce

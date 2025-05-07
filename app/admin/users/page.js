@@ -1,78 +1,46 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Users, Search, Filter, ChevronDown, Eye, Ban, User } from "lucide-react"
 import AdminLayout from "../../Components/admin-layout"
-
+import ClientAxios from "../../server/AxiosClient"
 // Sample data for users
-const usersData = [
-  {
-    id: 1,
-    name: "Thomas Dupont",
-    email: "thomas.dupont@example.com",
-    productsCount: 12,
-    status: "active",
-    joinDate: "12/04/2023",
-    location: "Lyon, 69003",
-    lastLogin: "Today, 10:30",
-    phone: "06 12 34 56 78",
-  },
-  {
-    id: 2,
-    name: "Marie Laurent",
-    email: "marie.laurent@example.com",
-    productsCount: 8,
-    status: "active",
-    joinDate: "23/05/2023",
-    location: "Paris, 75011",
-    lastLogin: "Yesterday, 15:45",
-    phone: "07 23 45 67 89",
-  },
-  {
-    id: 3,
-    name: "Jean Petit",
-    email: "jean.petit@example.com",
-    productsCount: 5,
-    status: "suspended",
-    joinDate: "05/02/2023",
-    location: "Marseille, 13008",
-    lastLogin: "3 days ago",
-    phone: "06 34 56 78 90",
-  },
-  {
-    id: 4,
-    name: "Sophie Martin",
-    email: "sophie.martin@example.com",
-    productsCount: 15,
-    status: "active",
-    joinDate: "18/01/2023",
-    location: "Bordeaux, 33000",
-    lastLogin: "Today, 08:15",
-    phone: "07 45 67 89 01",
-  },
-  {
-    id: 5,
-    name: "Lucas Bernard",
-    email: "lucas.bernard@example.com",
-    productsCount: 3,
-    status: "pending",
-    joinDate: "30/06/2023",
-    location: "Lille, 59000",
-    lastLogin: "1 week ago",
-    phone: "06 56 78 90 12",
-  },
-]
 
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-
+  const [usersData, setUsers] = useState([]);
   // Filter users based on search query and status
+  useEffect(()=>{
+    const fetchUsers = async () => {
+      try{
+        const response=await ClientAxios.get("/api/users")
+        console.log(response.data)
+        setUsers(response.data.map(user => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          productsCount: user.productsCount || 0,
+          status: user.status || "active",
+          joinDate: new Date(user.joinDate).toLocaleDateString(),
+          city: user.city || "Unknown",
+          lastLogin: new Date(user.last_login).toLocaleDateString()|| "00/00/0000",
+          phone: user.phone || "Unknown",
+        })))
+      }
+      catch(error){
+        console.error("Error fetching users:", error)
+      }
+
+    }
+    fetchUsers();
+
+  },[])
   const filteredUsers = usersData.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.location.toLowerCase().includes(searchQuery.toLowerCase())
+      user.city.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStatus = statusFilter === "all" || user.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -163,7 +131,7 @@ export default function UsersPage() {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Location
+                    city
                   </th>
                   <th
                     scope="col"
@@ -209,7 +177,7 @@ export default function UsersPage() {
                       <div className="text-sm text-gray-900">{user.email}</div>
                       <div className="text-sm text-gray-500">{user.phone}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.location}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.city}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.productsCount}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={user.status} />

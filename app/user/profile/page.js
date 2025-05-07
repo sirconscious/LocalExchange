@@ -130,14 +130,16 @@ export default function ProfilePage() {
                     ClientAxios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
                 }
                 const response = await ClientAxios.get("/api/user");
-                const User = response.data.user; // Access the actual data from the response
+                const User = response.data.user;  
+                const im = response.data.Profile_image
+                // Access the actual data from the response
                 console.log('user', User);
                 setName(User.name || "");
                 setEmail(User.email || "");
                 setPhone(User.phone || "");
                 setCity(User.city || "Lyon, 69003");
                 if (User.image) {
-                    setProfileImage(User.image);
+                    setProfileImage(im);
                 }
             } catch (error) {
                 console.error("Error fetching user:", error);
