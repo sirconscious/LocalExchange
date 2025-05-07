@@ -53,10 +53,25 @@ export default function NavBar() {
     fetchUser()
   }, [])
 
-  const handleLogout = () => {
-    Cookies.remove('access_token')
-    setUser(null)
-    router.push('/login')
+  const handleLogout = async () => {
+    try {
+      const token = Cookies.get('access_token')
+      if (token) {
+        await fetch('http://127.0.0.1:8000/api/logout', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Error during logout:', error)
+    } finally {
+      Cookies.remove('access_token')
+      setUser(null)
+      router.push('/login')
+    }
   }
 
   return (
