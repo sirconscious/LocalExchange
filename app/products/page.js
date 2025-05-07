@@ -4,6 +4,7 @@ import NavBar from "../Components/NavBar"
 import ProductCard from "../Components/ProductCard"
 import { Filter, SlidersHorizontal, ChevronDown, ArrowUpDown, ChevronLeft, ChevronRight, X, Euro } from "lucide-react";
 import PriceRangeSlider from "../Components/PriceRangeSlider";
+import Link from "next/link"
 
 export default function ProductExample() {
   // State for products and loading

@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react"
 import { useRouter , useParams } from "next/navigation"
 import Image from "next/image"
-import NavBar from "../../Components/NavBar"
+import NavBar from "../../Components/NavBar" 
+import Link from "next/link"
 import {
   Heart,
   Share2,
@@ -31,6 +32,7 @@ const formatter = new Intl.DateTimeFormat('fr-FR', options);
   const [related , setRelated] = useState([])
   const [isFavorite, setIsFavorite] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [characteristics, setCharacteristics] = useState([])
 
   useEffect(() => {
     const fetchpr = async () => {
@@ -45,6 +47,16 @@ const formatter = new Intl.DateTimeFormat('fr-FR', options);
         const data2 = await response2.data 
         console.log("test2" , data2.data) 
         setRelated(data2.data)
+
+        // Fetch characteristics
+        const response3 = await axios.get(`http://127.0.0.1:8000/api/caracteristique/${id}`)
+        const data3 = await response3.data
+        // Parse the JSON string from caracteristique field 
+        console.log("test3" , data3)
+        const parsedCharacteristics = JSON.parse(data3?.caracteristique)  
+        console.log("test4" , parsedCharacteristics)
+        // console.log("test4" , parsedCharacteristics)
+        setCharacteristics(parsedCharacteristics)
       } catch (error) {
         console.error("Error fetching product:", error)
       } finally {
@@ -208,7 +220,7 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
 
                 {/* Image counter */}
                 <div className="absolute bottom-4 right-4 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm">
-                  {activeImage + 1} / {product.images.length}
+                  {activeImage + 1} / {pr?.image.length}
                 </div>
               </div>
 
@@ -277,9 +289,9 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
                   (Math.floor((new Date() - new Date(pr?.dateDepot)) / (1000 * 60 * 60 ))) + " heures"
                   }</span>
                 </div>
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <span>{product.views} vues</span>
-                </div>
+                </div> */}
               </div>
 
               <div className="mt-6 space-y-3">
@@ -353,14 +365,14 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Caractéristiques</h2>
                 <div className="bg-gray-50 rounded-xl p-5">
                   <dl className="space-y-4">
-                    {product.specifications.slice(0, showAllSpecs ? undefined : 4).map((spec, index) => (
-                      <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
-                        <dt className="text-sm text-gray-500">{spec.name}</dt>
+                    {characteristics.slice(0, showAllSpecs ? undefined : 4).map((spec, index) => (
+                      <div key={spec.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                        <dt className="text-sm text-gray-500">{spec.key}</dt>
                         <dd className="text-sm font-medium text-gray-900">{spec.value}</dd>
                       </div>
                     ))}
                   </dl>
-                  {product.specifications.length > 4 && (
+                  {characteristics.length > 4 && (
                     <button
                       onClick={() => setShowAllSpecs(!showAllSpecs)}
                       className="mt-4 text-sm text-orange-500 hover:text-orange-600 font-medium flex items-center"
@@ -379,8 +391,8 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
             <h2 className="text-xl font-bold text-gray-800 mb-6">Produits similaires</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {related.map((relatedProduct) => (
+              <Link href={`/products/${relatedProduct.id}`} key={relatedProduct.id}> 
                 <div
-                  key={relatedProduct.id}
                   className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all"
                 >
                   <div className="relative h-48">
@@ -400,6 +412,7 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
                     </div>
                   </div>
                 </div>
+              </Link>
               ))}
             </div>
           </div>

@@ -133,7 +133,7 @@ export default function AddProduct() {
 
       // Append characteristics as JSON string
       if (characteristics.length > 0) {
-        formData.append('caracteristiques', JSON.stringify(characteristics))
+        formData.append('caracteristique', JSON.stringify(characteristics))
       }
 
       // Append all images
