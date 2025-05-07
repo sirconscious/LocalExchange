@@ -160,12 +160,11 @@ export default function ProfilePage() {
 
             try {
                 const token = Cookies.get("access_token")
-                if (token) {
-                    ClientAxios.defaults.headers.common["Authorization"] = `Bearer ${token}`
-                }
+              
                 const response = await ClientAxios.post("/api/user/update-image", formData, {
                     headers: {
-                        'Content-Type': 'multipart/form-data'
+                        'Content-Type': 'multipart/form-data' , 
+                        "Authorization": `Bearer ${token}`
                     }
                 })
                 setProfileImage(response.data.image_url)

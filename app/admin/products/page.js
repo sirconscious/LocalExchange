@@ -27,7 +27,7 @@ export default function ProductsPage() {
           date: new Date(product.dateDepot || product.created_at).toLocaleDateString(),
           description: product.description,
           views: 0, // Not in API response, defaulting to 0
-          image: product.image?.length > 0 ? product.image[0] : "/placeholder.svg",
+          image: product.image?.length > 0 ? product.image[0].url : "/placeholder.svg",
           localisation: product.localisation,
           ownerDetails: product.owner
         }))
