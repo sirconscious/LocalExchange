@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Package, Search, Filter, ChevronDown, Eye, Trash2 } from "lucide-react"
+import { Package, Search, Filter, ChevronDown, Eye, Trash2, ChevronLeft, ChevronRight } from "lucide-react"
 import AdminLayout from "../../Components/admin-layout"
 import ClientAxios from "../../server/AxiosClient"
 
@@ -11,35 +11,57 @@ export default function ProductsPage() {
   const [categoryFilter, setCategoryFilter] = useState("all")
   const [productsData, setProducts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+    }, 500) // Wait for 500ms after user stops typing
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await ClientAxios.get("/api/products")
-        const formattedProducts = response.data.data.map(product => ({
-          id: product.id,
-          title: product.nom,
-          owner: product.owner?.name || product.vendeur || "Unknown",
-          ownerId: product.vendeur_id,
-          category: product.categorie,
-          price: product.prix,
-          status: product.etat || "active", // Default to active if no status
-          date: new Date(product.dateDepot || product.created_at).toLocaleDateString(),
-          description: product.description,
-          views: 0, // Not in API response, defaulting to 0
-          image: product.image?.length > 0 ? product.image[0].url : "/placeholder.svg",
-          localisation: product.localisation,
-          ownerDetails: product.owner
-        }))
-        setProducts(formattedProducts)
-      } catch (error) {
-        console.error("Error fetching products:", error)
-      } finally {
-        setIsLoading(false)
-      }
+    fetchProducts(currentPage)
+  }, [currentPage, debouncedSearch, statusFilter, categoryFilter])
+
+  const fetchProducts = async (page) => {
+    try {
+      setIsLoading(true)
+      const params = new URLSearchParams({
+        page: page,
+        search: debouncedSearch,
+        status: statusFilter,
+        category: categoryFilter
+      })
+
+      const response = await ClientAxios.get(`/api/products?${params.toString()}`)
+      const formattedProducts = response.data.data.map(product => ({
+        id: product.id,
+        title: product.nom,
+        owner: product.owner?.name || product.vendeur || "Unknown",
+        ownerId: product.vendeur_id,
+        category: product.categorie,
+        price: product.prix,
+        status: product.etat || "active",
+        date: new Date(product.dateDepot || product.created_at).toLocaleDateString(),
+        description: product.description,
+        views: 0,
+        image: product.image?.length > 0 ? product.image[0].url : "/placeholder.svg",
+        localisation: product.localisation,
+        ownerDetails: product.owner
+      }))
+      setProducts(formattedProducts)
+      setTotalPages(response.data.last_page)
+    } catch (error) {
+      console.error("Error fetching products:", error)
+    } finally {
+      setIsLoading(false)
     }
-    fetchProducts()
-  }, [])
+  }
 
   // Get unique categories from products
   const categories = ["all", ...new Set(productsData.map((product) => product.category))]
@@ -200,6 +222,39 @@ export default function ProductsPage() {
               {productsData.length === 0 ? "No products available" : "No products found matching your criteria"}
             </div>
           )}
+
+          {/* Pagination */}
+          <div className="px-6 py-4 border-t border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                Showing page {currentPage} of {totalPages}
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                  }`}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === totalPages
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                  }`}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </AdminLayout>
