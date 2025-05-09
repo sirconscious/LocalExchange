@@ -4,8 +4,11 @@ import { useEffect, useState } from "react"
 import { Users, Search, Filter, ChevronDown, Eye, Ban, User, ChevronLeft, ChevronRight } from "lucide-react"
 import AdminLayout from "../../Components/admin-layout"
 import ClientAxios from "../../server/AxiosClient"
+import { useRouter } from "next/navigation"
+import Cookies from "js-cookie"
 
 export default function UsersPage() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [usersData, setUsers] = useState([])
@@ -59,8 +62,17 @@ export default function UsersPage() {
 
   const handleStatusUpdate = async (userId, currentStatus) => {
     try {
+      const token = Cookies.get("access_token")
       const newStatus = currentStatus === "active" ? "suspended" : "active"
-      await ClientAxios.put(`/api/users/${userId}/status`, { status: newStatus })
+      await ClientAxios.put(`/api/users/${userId}/status`, 
+        { status: newStatus },
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json",
+          }
+        }
+      )
       fetchUsers(currentPage) // Refresh the users list
     } catch (error) {
       console.error("Error updating user status:", error)
@@ -201,7 +213,7 @@ export default function UsersPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.lastLogin}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
-                          <button className="text-blue-600 hover:text-blue-800" title="View User">
+                          <button onClick={() => router.push(`/admin/users/${user.id}`)} className="text-blue-600 hover:text-blue-800" title="View User">
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
