@@ -34,7 +34,7 @@ export default function UsersPage() {
       const params = new URLSearchParams({
         page: page,
         search: debouncedSearch,
-        status: statusFilter !== "all" ? statusFilter : ""
+        status: statusFilter, 
       })
 
       const response = await ClientAxios.get(`/api/users?${params.toString()}`)
@@ -123,7 +123,7 @@ export default function UsersPage() {
                     <option value="all">All Status</option>
                     <option value="active">Active</option>
                     <option value="suspended">Suspended</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="pending">Pending</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <ChevronDown className="h-4 w-4 text-gray-400" />
