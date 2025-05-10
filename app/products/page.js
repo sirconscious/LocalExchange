@@ -29,7 +29,7 @@ export default function ProductExample() {
           description: product.description,
           price: product.prix,
           location: product.localisation,
-          imageUrl:  product.image && product.image[0] && product.image[0].url ? product.image[0].url : "/categories/h.jpg", // Default image since API doesn't provide one
+          imageUrl:  product.image && product.image[0] && product?.image[0]?.url ? product?.image[0]?.url : "/categories/h.jpg", // Default image since API doesn't provide one
           category: product.categorie,
           timePosted: formatTimePosted(product.dateDepot),
           sellerName: product.vendeur,
@@ -37,7 +37,7 @@ export default function ProductExample() {
           isNew: isNewProduct(product.dateDepot),
           isFeatured: false, // Default value since API doesn't provide this
         })); 
-        console.log(data.data[7].image[0].url)
+        console.log(data.data[7].image[0]?.url)
         setAllProducts(transformedProducts);
       } catch (err) {
         setError(err.message);

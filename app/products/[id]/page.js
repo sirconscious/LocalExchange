@@ -18,21 +18,59 @@ import {
   ChevronRightIcon,
 } from "lucide-react"
 import axios from "axios"
+import Cookies from "js-cookie";
 
 export default function ProductDetails(props) { 
   const params = useParams() // Use the `useParams` hook to access params
   const options = { month: 'long', year: 'numeric' };
-const formatter = new Intl.DateTimeFormat('fr-FR', options);
+  const formatter = new Intl.DateTimeFormat('fr-FR', options);
 
   const id = params?.id // Access the `id` from the unwrapped params
   const router = useRouter()
   const [activeImage, setActiveImage] = useState(0)
   const [showAllSpecs, setShowAllSpecs] = useState(false)
   const [pr, setPr] = useState({})
-  const [related , setRelated] = useState([])
+  const [related, setRelated] = useState([])
   const [isFavorite, setIsFavorite] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [characteristics, setCharacteristics] = useState([])
+  const [message, setMessage] = useState("");
+  const [showMessage, setShowMessage] = useState(false);
+
+  const addTocart = async () => {
+    try {
+      const token = Cookies.get("access_token"); // Retrieve the token from cookies
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/cart/add",
+        {
+          product_id: pr.id,
+        },
+        {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`, // Use the token from cookies
+          },
+        }
+      );
+      console.log("Product added to cart:", response.data);
+      setMessage("Produit ajouté au panier"); // Set success message
+      setShowMessage(true); // Show the message with animation
+      
+      setTimeout(() => {
+        setShowMessage(false); // Start fade out animation
+        setTimeout(() => setMessage(""), 300); // Clear message after animation completes
+      }, 3000);
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      setMessage("Erreur lors de l'ajout au panier"); // Set error message
+      setShowMessage(true); // Show the message with animation
+      
+      setTimeout(() => {
+        setShowMessage(false); // Start fade out animation
+        setTimeout(() => setMessage(""), 300); // Clear message after animation completes
+      }, 3000);
+    }
+  };
 
   useEffect(() => {
     const fetchpr = async () => {
@@ -253,7 +291,7 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
                 <div>
                   <h1 className="text-2xl font-bold text-gray-800 leading-tight">{pr?.nom}</h1>
                   <div className="mt-3 flex items-center">
-                    <span className="text-3xl font-bold text-orange-600">{pr?.prix.toFixed(2)} €</span>
+                    <span className="text-3xl font-bold text-orange-600">{pr?.prix} €</span>
                
                   </div>
                 </div>
@@ -333,8 +371,39 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
                   </div>
                 </div>
                 <div className="mt-4">
-                  <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3.5 px-4 rounded-xl font-medium transition-colors flex items-center justify-center">
-                    <ShoppingCart className="h-5 w-5 mr-2" />
+                  {message && (
+                    <div 
+                      className={`mb-4 px-4 py-3 rounded-lg flex items-center justify-center transition-all duration-300 ease-in-out ${
+                        showMessage 
+                          ? "opacity-100 transform translate-y-0" 
+                          : "opacity-0 transform -translate-y-2"
+                      } ${
+                        message.includes("Erreur") 
+                          ? "bg-red-50 border border-red-100 text-red-600" 
+                          : "bg-green-50 border border-green-100 text-green-600"
+                      }`}
+                    >
+                      {message.includes("Erreur") ? (
+                        <span className="h-5 w-5 mr-2 text-red-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                          </svg>
+                        </span>
+                      ) : (
+                        <span className="h-5 w-5 mr-2 text-green-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                          </svg>
+                        </span>
+                      )}
+                      <span className="font-medium">{message}</span>
+                    </div>
+                  )}
+                  <button onClick={addTocart} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3.5 px-4 rounded-xl font-medium transition-colors flex items-center justify-center">
+                    <ShoppingCart  className="h-5 w-5 mr-2" />
                     Ajouter au panier
                   </button>
                 </div>
@@ -405,7 +474,7 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
                   </div>
                   <div className="p-4">
                     <h3 className="font-medium text-gray-900 truncate">{relatedProduct?.nom}</h3>
-                    <p className="mt-1 text-orange-600 font-bold">{relatedProduct?.prix.toFixed(2)} €</p>
+                    <p className="mt-1 text-orange-600 font-bold">{relatedProduct?.prix} €</p>
                     <div className="mt-2 flex items-center text-xs text-gray-500">
                       <MapPin className="h-3 w-3 mr-1" />
                       <span>{relatedProduct?.localisation}</span>
