@@ -11,16 +11,21 @@ export default function ProductExample() {
   const [allProducts, setAllProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  // console.log("test") 
+  // useEffect(()=>{
+  //   console.log("test 123")
+  // } , [])
   // Fetch products from API
-  useEffect(() => {
+  useEffect(() => { 
+    // console.log("test 123") ;
     const fetchProducts = async () => {
       try {
         const response = await fetch('http://127.0.0.1:8000/api/products');
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
-        const data = await response.json();
+        const data = await response.json(); 
+        console.log("data" , data)
         // Transform API data to match our component's expected format
         const transformedProducts = data.data.map(product => ( { 
           
@@ -29,7 +34,7 @@ export default function ProductExample() {
           description: product.description,
           price: product.prix,
           location: product.localisation,
-          imageUrl:  product.image && product.image[0] && product?.image[0]?.url ? product?.image[0]?.url : "/categories/h.jpg", // Default image since API doesn't provide one
+          imageUrl:  product?.image && product?.image[0] && product?.image[0]?.url ? product?.image[0]?.url : "/categories/h.jpg", // Default image since API doesn't provide one
           category: product.categorie,
           timePosted: formatTimePosted(product.dateDepot),
           sellerName: product.vendeur,
@@ -37,7 +42,7 @@ export default function ProductExample() {
           isNew: isNewProduct(product.dateDepot),
           isFeatured: false, // Default value since API doesn't provide this
         })); 
-        console.log(data.data[7].image[0]?.url)
+        // console.log(data.data[7].image[0]?.url)
         setAllProducts(transformedProducts);
       } catch (err) {
         setError(err.message);

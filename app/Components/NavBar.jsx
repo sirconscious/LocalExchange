@@ -30,7 +30,14 @@ export default function NavBar() {
     const fetchUser = async () => {
       try {
         const token = Cookies.get('access_token')
-        if (!token) return
+        console.log("Token:", token) // Debug log for token
+        
+        if (!token) {
+          console.log("No token found, setting user to null") // Debug log
+          setUser(null)
+          setProfileI(null)
+          return
+        }
 
         const response = await fetch('http://127.0.0.1:8000/api/user', {
           headers: {
@@ -39,19 +46,42 @@ export default function NavBar() {
           }
         })
 
+        console.log("Response status:", response.status) // Debug log for response status
+
         if (response.ok) {
-          const data = await response.json()  
-          setProfileI(data.Profile_image)
-          console.log("test" , data)
-          setUser(data.user)
+          const data = await response.json()
+          console.log("Full API Response:", data) // Debug log for full response
+          console.log("User data:", data.user) // Debug log for user data
+          console.log("Profile image:", data.Profile_image) // Debug log for profile image
+          
+          if (data && data.user) {
+            console.log("Setting user data and profile image") // Debug log
+            setUser(data.user)
+            setProfileI(data.Profile_image || null)
+          } else {
+            console.log("Invalid data structure, setting user to null") // Debug log
+            setUser(null)
+            setProfileI(null)
+          }
+        } else {
+          console.log("Response not OK, setting user to null") // Debug log
+          setUser(null)
+          setProfileI(null)
         }
       } catch (error) {
         console.error('Error fetching user:', error)
+        console.log("Error occurred, setting user to null") // Debug log
+        setUser(null)
+        setProfileI(null)
       }
     }
 
     fetchUser()
   }, [])
+
+  // Add debug logging for render
+  console.log("Current user state:", user) // Debug log for user state
+  console.log("Current profileI state:", profileI) // Debug log for profileI state
 
   const handleLogout = async () => {
     try {
@@ -147,16 +177,16 @@ export default function NavBar() {
             <button className="text-gray-600 hover:text-orange-500 transition-colors duration-200 hover:scale-110">
               <Bell className="h-6 w-6" />
             </button>
-            {user ? (
+            {user && user.name ? (
               <div className="relative">
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 text-gray-600 hover:text-orange-500 transition-colors duration-200"
                 >
-                  {user.image ? (
+                  {profileI ? (
                     <img 
                       src={profileI} 
-                      alt={user.name} 
+                      alt={user.name || 'Profile'} 
                       className="h-8 w-8 rounded-full object-cover"
                     />
                   ) : (
@@ -268,16 +298,16 @@ export default function NavBar() {
               <button className="p-2 rounded-full text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-colors duration-200">
                 <Bell className="h-6 w-6" />
               </button>
-              {user ? (
+              {user && user.name ? (
                 <div className="relative">
                   <button 
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="p-2 rounded-full text-gray-600 hover:text-orange-500 hover:bg-orange-50 transition-colors duration-200"
                   >
-                    {user.image ? (
+                    {profileI ? (
                       <img 
                         src={profileI} 
-                        alt={user.name} 
+                        alt={user.name || 'Profile'} 
                         className="h-6 w-6 rounded-full object-cover"
                       />
                     ) : (

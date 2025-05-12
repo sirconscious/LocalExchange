@@ -87,7 +87,8 @@ export default function ProductDetails(props) {
         setRelated(data2.data)
 
         // Fetch characteristics
-        const response3 = await axios.get(`http://127.0.0.1:8000/api/caracteristique/${id}`)
+        const response3 = await axios.get(`http://127.0.0.1:8000/api/caracteristique/${id}`) 
+        console.log("test3" , response3)
         const data3 = await response3.data
         // Parse the JSON string from caracteristique field 
         console.log("test3" , data3)
@@ -459,14 +460,14 @@ Le canapé est vendu avec tous les coussins visibles sur les photos. La livraiso
           <div className="p-6 border-t border-gray-100">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Produits similaires</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {related.map((relatedProduct) => (
+              {related.map((relatedProduct) => ( 
               <Link href={`/products/${relatedProduct.id}`} key={relatedProduct.id}> 
                 <div
                   className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all"
                 >
                   <div className="relative h-48">
                     <Image
-                      src={relatedProduct?.image[0] || "/categories/h.jpg"}
+                      src={relatedProduct?.image[0]?.url || "/categories/h.jpg"}
                       alt={relatedProduct?.nom}
                       fill
                       className="object-cover"
