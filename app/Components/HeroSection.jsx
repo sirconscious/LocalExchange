@@ -1,36 +1,48 @@
-// "use client"
-// import Link from 'next/link.js';
-// import React from 'react';
- 
-
-// import { CiSquarePlus } from "react-icons/ci";
-
-// export default function HeroSection() {
-//   return (
-//     <div
-//       className="flex justify-center flex-col items-center w-full  p-4 rounded-2xl w-4xl"
-//       style={{
-//         backgroundImage: `url(/cover2.png)`,
-//         backgroundSize: 'cover',
-//         backgroundPosition: 'center',
-//       }}
-//     >
-//       <p className="text-2xl p-3 text-white font-bold">C'est le moment pour vendre</p> 
-//       <Link href="/login">
-//       <button className="bg-[#FF6E14] hover:opacity-85 transition-all  cursor-pointer text-white p-2 px-4 font-bold rounded-2xl flex items-center space-x-3">
-//         <CiSquarePlus className="text-2xl font-extrabold cursor-pointer" />
-//         Déposer une annonce
-//       </button>
-//       </Link>
-//     </div>
-//   );
-// }
 "use client"
 import Link from "next/link"
 import { PlusSquare } from "lucide-react"
 import Image from "next/image"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Cookies from 'js-cookie'
 
 export default function HeroSection() {
+  const [user, setUser] = useState(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = Cookies.get('access_token')
+        if (!token) return
+
+        const response = await fetch('http://127.0.0.1:8000/api/user', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setUser(data.user)
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error)
+      }
+    }
+
+    fetchUser()
+  }, [])
+
+  const handleDeposerAnnonce = () => {
+    if (user) {
+      router.push('/products/add')
+    } else {
+      router.push('/login')
+    }
+  }
+
   return (
     <div className="relative rounded-xl overflow-hidden shadow-lg">
       {/* Background Image */}
@@ -58,12 +70,13 @@ export default function HeroSection() {
           Vendez facilement vos objets inutilisés et trouvez des trésors près de chez vous avec LocalExchange.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
-          <Link href="/login">
-            <button className="bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-full font-bold flex items-center space-x-3 transform transition-all duration-300 hover:scale-105 shadow-lg">
-              <PlusSquare className="mr-2" />
-              Déposer une annonce
-            </button>
-          </Link>
+          <button 
+            onClick={handleDeposerAnnonce}
+            className="bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-full font-bold flex items-center space-x-3 transform transition-all duration-300 hover:scale-105 shadow-lg"
+          >
+            <PlusSquare className="mr-2" />
+            Déposer une annonce
+          </button>
           <Link href="/signup">
             <button className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border border-white/30 py-3 px-6 rounded-full font-bold flex items-center space-x-3 transform transition-all duration-300 hover:scale-105">
               Découvrir comment ça marche
